@@ -5,6 +5,7 @@ module.exports = {
       less: {
         javascriptEnabled: true,
         modifyVars: {
+          'primary-color': '#ddd',
           'menu-dark-bg': '#111',
         },
       },
