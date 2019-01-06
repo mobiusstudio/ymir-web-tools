@@ -1,36 +1,46 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <div>
-      <p>
-        If Ant-Design-Vue is successfully added to this project, you'll see an
-        <code v-text="'<a-button>'"></code>
-        below
-      </p>
-      <a-button type="primary">Primary</a-button>
-    </div>
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <a-layout>
+      <a-layout-header>Swagger - Management - Tools</a-layout-header>
+      <a-layout-content><router-view/></a-layout-content>
+      <a-layout-footer><span>Mobius Studio - Ymir</span></a-layout-footer>
+    </a-layout>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Navigator from '@/components/navigator.vue'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld,
+    Navigator,
   },
 }
 </script>
 
-<style>
+<style lang="less">
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  min-height: 100%;
+
+  .ant-layout {
+    position: absolute;
+    width: 100%;
+    min-height: 100%;
+  }
+  .ant-layout-header,
+  .ant-layout-footer {
+    height: 64px;
+    color: #ddd;
+    background-color: #111;
+  }
+  .ant-layout-content {
+    position: relative;
+    background-color: #222;
+  }
 }
 </style>

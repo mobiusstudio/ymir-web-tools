@@ -1,18 +1,32 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div><a-button type="primary" @click="handleClickManager()">Manager</a-button></div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
   name: 'home',
   components: {
-    HelloWorld,
+    Navigator,
   },
+
+  data() {
+    return {
+    }
+  },
+  methods: {
+    handleClickManager() {
+      this.$router.push('/manager')
+    },
+  },
+
 }
 </script>
+
+<style lang="less">
+.home {
+  margin-top: 50px;
+}
+</style>

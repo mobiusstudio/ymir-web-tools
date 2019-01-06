@@ -4,6 +4,9 @@ module.exports = {
     loaderOptions: {
       less: {
         javascriptEnabled: true,
+        modifyVars: {
+          'menu-dark-bg': '#111',
+        },
       },
     },
   },
