@@ -2,26 +2,37 @@
   <div class="manager">
     <div class="view-tree">
       <a-button class="new-schema-btn">new schema</a-button>
-      <template v-for="(item, index) of schemaArray">
+      <template v-for="(item, index) of schemas">
         <div :key="index"><a-button class="schema-btn">{{item}}</a-button></div>
       </template>
     </div>
     <div class="content-panel">
-      <a-card class="card-tag" :title="userPaths.tag">
-        <a-collapse accordion>
-          <template v-for="(path, uindex) of Object.keys(userPaths.paths)">
-            <a-collapse-panel :header="path" :key="uindex">
-              <a-collapse accordion>
-                <template v-for="(func, pindex) of Object.keys(userPaths.paths[path])">
-                  <a-collapse-panel :header="func" :key="pindex">
-                    <p>operationId: {{userPaths.paths[path][func].operationId}}</p>
-                  </a-collapse-panel>
-                </template>
-              </a-collapse>
-            </a-collapse-panel>
-          </template>
-        </a-collapse>
-      </a-card>
+      <template v-for="(schema, sindex) of schemaArray">
+        <div :key="sindex">
+          <a-divider orientation="left">{{schema.tag}}</a-divider>
+          <a-collapse :accordion="isAccordion">
+            <template v-for="(pathName, pindex) of Object.keys(schema.paths)">
+              <template v-for="(funcName, index) of funcMap">
+                <a-collapse-panel v-if="schema.paths[pathName][funcName]">
+                  <div slot="header">
+                    <span>{{funcName.toUpperCase()}}: </span>
+                    <span>{{pathName}}</span>
+                  </div>
+                  <a-collapse :accordion="isAccordion">
+                    <a-collapse-panel>
+                      <div slot="header">
+                        <span>operationId: </span>
+                        <span>{{schema.paths[pathName][funcName].operationId}}</span>
+                      </div>
+                      <p>text......</p>
+                    </a-collapse-panel>
+                  </a-collapse> 
+                </a-collapse-panel>
+              </template>
+            </template>
+          </a-collapse>
+        </div>
+      </template>
     </div>
     <div class="code-view">
       <a-tabs>
@@ -33,67 +44,72 @@
 </template>
 
 <script>
+  const funcMap = ['get', 'post', 'patch', 'delete']
+  const schemas = [
+          'user',
+          'profile',
+          'task',
+          'question',
+          'answer',
+        ]
+  const userPaths = {
+    tag: 'User',
+    paths: {
+      'user/': {
+        get: {
+          operationId: 'getUserList',
+        },
+        post: {
+          operationId: 'addUser',
+        },
+      },
+      'user/{id}': {
+        get: {
+          operationId: 'getUser',
+        },
+        patch: {
+          operationId: 'updateUser',
+        },
+        delet: {
+          operationId: 'deleteUser',
+        },
+      },
+    },
+  }
+  const taskPaths = {
+    tag: 'Task',
+    paths: {
+      'task/': {
+        get: {
+          operationId: 'getTaskList',
+        },
+        post: {
+          operationId: 'addTask',
+        },
+      },
+      'task/{id}': {
+        get: {
+          operationId: 'getTask',
+        },
+        patch: {
+          operationId: 'updateTask',
+        },
+        delet: {
+          operationId: 'deleteTask',
+        },
+      },
+    },
+  }
 export default {
   data() {
     return {
+      funcMap,
+      schemas,
+
+      isAccordion: false,
       schemaArray: [
-        'user',
-        'profile',
-        'task',
-        'question',
-        'answer',
-      ],
-      userPaths: {
-        tag: 'User',
-        paths: {
-          'user/': {
-            get: {
-              operationId: 'getUserList',
-            },
-            post: {
-              operationId: 'addUser',
-            },
-          },
-          'user/{id}': {
-            get: {
-              operationId: 'getUser',
-            },
-            patch: {
-              operationId: 'updateUser',
-            },
-            delet: {
-              operationId: 'deleteUser',
-            },
-          },
-        },
-      },
-      taskPaths: {
-        tag: 'Task',
-        paths: {
-          'task/': {
-            get: {
-              operationId: 'getTaskList',
-            },
-            post: {
-              operationId: 'addTask',
-            },
-          },
-          'task/{id}': {
-            get: {
-              operationId: 'getTask',
-            },
-            patch: {
-              operationId: 'updateTask',
-            },
-            delet: {
-              operationId: 'deleteTask',
-            },
-          },
-        },
-      },
-      pathArray: [
-        this.userPaths,
-        this.taskPaths,
+        userPaths,
+        taskPaths,
       ],
     }
   },
@@ -132,6 +148,7 @@ export default {
     right: 35%;
     min-height: 100%;
     padding: 20px;
+    text-align: left;
   }
   .code-view {
     position: absolute;
