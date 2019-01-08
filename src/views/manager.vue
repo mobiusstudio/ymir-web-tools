@@ -7,28 +7,32 @@
       </template>
     </div>
     <div class="content-panel">
-      <template v-for="(schema, sindex) of schemaArray">
-        <div :key="sindex">
-          <a-divider orientation="left">{{schema.tag}}</a-divider>
+      <template v-for="(tag, tindex) of newSwagger.tags">
+        <div :key="tindex">
+          <a-divider orientation="left">{{tag.name}}</a-divider>
           <a-collapse :accordion="isAccordion">
-            <template v-for="(pathName, pindex) of Object.keys(schema.paths)">
-              <template v-for="(funcName, index) of funcMap">
-                <a-collapse-panel v-if="schema.paths[pathName][funcName]">
-                  <div slot="header">
-                    <span>{{funcName.toUpperCase()}}: </span>
-                    <span>{{pathName}}</span>
-                  </div>
-                  <a-collapse :accordion="isAccordion">
-                    <a-collapse-panel>
+            <template v-for="(pathName, pindex) of Object.keys(newSwagger.paths)">
+                <template v-for="(funcName, findex) of funcMap">
+                    <a-collapse-panel :key="`${pindex}_${findex}`" v-if="newSwagger.paths[pathName][funcName] && newSwagger.paths[pathName][funcName].tags.includes(tag.name)">
                       <div slot="header">
-                        <span>operationId: </span>
-                        <span>{{schema.paths[pathName][funcName].operationId}}</span>
+                        <span>{{funcName.toUpperCase()}}: </span>
+                        <span>{{pathName}}</span>
                       </div>
-                      <p>text......</p>
+                      <a-collapse :accordion="isAccordion">
+                        <a-collapse-panel>
+                          <div slot="header">
+                            <span>operationId: </span>
+                            <span>{{newSwagger.paths[pathName][funcName].operationId}}</span>
+                          </div>
+                          <p>text......</p>
+                        </a-collapse-panel>
+                        <a-collapse-panel></a-collapse-panel>
+                        <a-collapse-panel></a-collapse-panel>
+                        <a-collapse-panel></a-collapse-panel>
+                        <a-collapse-panel></a-collapse-panel>
+                      </a-collapse> 
                     </a-collapse-panel>
-                  </a-collapse> 
-                </a-collapse-panel>
-              </template>
+                </template>
             </template>
           </a-collapse>
         </div>
@@ -44,6 +48,7 @@
 </template>
 
 <script>
+import { cloneDeep } from 'lodash'
 import swagger from '../../swagger/swagger'
 
   const funcMap = ['get', 'post', 'patch', 'delete']
@@ -105,6 +110,7 @@ import swagger from '../../swagger/swagger'
 export default {
   data() {
     return {
+      newSwagger: cloneDeep(swagger),
       funcMap,
       schemas,
 
@@ -114,6 +120,12 @@ export default {
         taskPaths,
       ],
     }
+  },
+  computed: {
+    // isFuncIn (pathName, funcName, tag) {
+    //   console.log('here', pathName, funcName, tag)
+    //   return 
+    // }
   },
   methods: {
     initPage() {
