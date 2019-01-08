@@ -1,5 +1,5 @@
-import { snakeCase } from 'lodash'
-import errors from '../../errors'
+// import { snakeCase } from 'lodash'
+// import errors from '../../errors'
 
 const type2formats = {
   integer: ['int32', 'int64'],
@@ -160,33 +160,33 @@ export const eol = {
   type: type.boolean,
 }
 
-export const generateErrorResponses = (errorArr) => {
-  const code2error = errorArr.reduce((map, ErrorConstructor) => {
-    const err = new ErrorConstructor()
-    const newMap = map
-    if (!newMap[err.statusCode]) newMap[err.statusCode] = []
-    newMap[err.statusCode].push({
-      errorCode: snakeCase(err.name).toUpperCase(),
-      message: errors.lang(err) || err.name,
-    })
-    return newMap
-  }, {})
-  return Object.keys(code2error).reduce((map, errorCode) => {
-    const errs = code2error[errorCode]
-    const newMap = map
-    newMap[errorCode] = {
-      description: `
-| code | message |
-| ---- | ------- |
-${errs.map(err => `| ${err.errorCode} | ${err.message} |\n`).join('')}
+// export const generateErrorResponses = (errorArr) => {
+//   const code2error = errorArr.reduce((map, ErrorConstructor) => {
+//     const err = new ErrorConstructor()
+//     const newMap = map
+//     if (!newMap[err.statusCode]) newMap[err.statusCode] = []
+//     newMap[err.statusCode].push({
+//       errorCode: snakeCase(err.name).toUpperCase(),
+//       message: errors.lang(err) || err.name,
+//     })
+//     return newMap
+//   }, {})
+//   return Object.keys(code2error).reduce((map, errorCode) => {
+//     const errs = code2error[errorCode]
+//     const newMap = map
+//     newMap[errorCode] = {
+//       description: `
+// | code | message |
+// | ---- | ------- |
+// ${errs.map(err => `| ${err.errorCode} | ${err.message} |\n`).join('')}
 
-`,
-      schema: {
-        $ref: $ref('errorResponse'),
-      },
-    }
-    return newMap
-  }, {})
-}
+// `,
+//       schema: {
+//         $ref: $ref('errorResponse'),
+//       },
+//     }
+//     return newMap
+//   }, {})
+// }
 
 export default { }
