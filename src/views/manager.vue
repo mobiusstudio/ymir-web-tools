@@ -1,10 +1,7 @@
 <template>
   <div class="manager">
     <div class="view-tree">
-      <a-button class="new-schema-btn">new schema</a-button>
-      <template v-for="(item, index) of schemas">
-        <div :key="index"><a-button class="schema-btn">{{item}}</a-button></div>
-      </template>
+      <SchemaManager :schemas="schemas"></SchemaManager>
     </div>
     <div class="content-panel">
       <template v-for="(tag, tindex) of newSwagger.tags">
@@ -49,15 +46,16 @@
 
 <script>
 import { cloneDeep } from 'lodash'
+import SchemaManager from '../components/schema-manager'
 import swagger from '../../swagger/swagger'
 
   const funcMap = ['get', 'post', 'patch', 'delete']
   const schemas = [
-          'user',
-          'profile',
-          'task',
-          'question',
-          'answer',
+          { schemaName: 'task' },
+          { schemaName: 'user' },
+          { schemaName: 'profile' },
+          { schemaName: 'question' },
+          { schemaName: 'answer' },
         ]
   const userPaths = {
     tag: 'User',
@@ -108,6 +106,9 @@ import swagger from '../../swagger/swagger'
     },
   }
 export default {
+  components: {
+    SchemaManager,
+  },
   data() {
     return {
       newSwagger: cloneDeep(swagger),
