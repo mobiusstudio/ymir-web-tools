@@ -36,11 +36,11 @@ export default {
   .ant-layout-footer {
     height: 64px;
     color: #ddd;
-    background-color: #111;
+    background-color: #333;
   }
   .ant-layout-content {
     position: relative;
-    background-color: #222;
+    background-color: whitesmoke;
   }
 }
 </style>
