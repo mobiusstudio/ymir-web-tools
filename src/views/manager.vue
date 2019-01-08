@@ -115,6 +115,14 @@ export default {
       ],
     }
   },
+  methods: {
+    initPage() {
+      console.log(swagger)
+    }
+  },
+  mounted() {
+    this.initPage()
+  },
 }
 </script>
 
