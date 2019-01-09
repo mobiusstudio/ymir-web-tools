@@ -23,25 +23,25 @@
         <template v-for="(item, index) of defaultSchemaForm.items">
           <div class="schema-column" :key="index">
             <a-collapse >
-              <a-collapse-panel :header="item.name">
+              <a-collapse-panel :header="getColumnHeader(item)">
                 <a-form-item label="name" required>
                   <a-input
                   v-decorator="['items[index][name]', { initialValue: defaultSchemaForm.items[index].name }]"
                   />
                 </a-form-item>
-                <a-form-item v-if="item.alias" label="alias">
+                <a-form-item label="type">
+                  <a-input
+                  v-decorator="['items[index][type]', { initialValue: defaultSchemaForm.items[index].type }]"
+                  />
+                </a-form-item>
+                <a-form-item label="alias">
                   <a-input
                   v-decorator="['items[index][alias]', { initialValue: defaultSchemaForm.items[index].alias }]"
                   />
                 </a-form-item>
-                <a-form-item v-if="item.foreign" label="foreign">
+                <a-form-item label="foreign">
                   <a-input
                   v-decorator="['items[index][foreign]', { initialValue: defaultSchemaForm.items[index].foreign }]"
-                  />
-                </a-form-item>
-                <a-form-item v-if="item.type" label="type">
-                  <a-input
-                  v-decorator="['items[index][type]', { initialValue: defaultSchemaForm.items[index].type }]"
                   />
                 </a-form-item>
               </a-collapse-panel>
@@ -73,7 +73,7 @@ export default {
         schemaName: '',
         tableName: '',
         items: [],
-      }
+      },
     }
   },
   computed: {
@@ -95,21 +95,26 @@ export default {
       this.isDetail = true
     },
 
+    getColumnHeader(item) {
+      return `${item.name} <${item.type}>`
+    },
+
     demodelize(model) {
       const items = model.columns.items.map((item) => {
-        return {
+        const newItem = {
           name: item.name,
           alias: item.alias,
           foreign: item.foreign,
           type: item.type,
         }
+        return newItem
       })
       return {
         schemaName: model.schemaName,
         tableName: model.tableName,
         items,
       }
-    }
+    },
   },
   beforeCreate() {
     this.schemaForm = this.$form.createForm(this, {
@@ -147,9 +152,7 @@ export default {
     background-color: #666;
   }
   .schema-column {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
   }
 }
 </style>
-
-
