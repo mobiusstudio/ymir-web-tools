@@ -1,7 +1,7 @@
 <template>
   <div class="manager">
-    <div class="view-tree">
-      <SchemaManager :schemas="schemas"></SchemaManager>
+    <div class="left-panel">
+      <SchemaManager :schemas="schemas" @change="handleChangeSchema"/>
     </div>
     <div class="content-panel">
       <template v-for="(tag, tindex) of newSwagger.tags">
@@ -35,11 +35,8 @@
         </div>
       </template>
     </div>
-    <div class="code-view">
-      <a-tabs>
-        <a-tab-pane tab="js" key="1">js code</a-tab-pane>
-        <a-tab-pane tab="sql" key="2">sql code</a-tab-pane>
-      </a-tabs>
+    <div class="right-panel">
+      <CodeView :schema="currentSchema"/>
     </div>
   </div>
 </template>
@@ -47,6 +44,7 @@
 <script>
 import { cloneDeep } from 'lodash'
 import SchemaManager from '../components/schema-manager.vue'
+import CodeView from '../components/code-view.vue'
 import swagger from '../../swagger/swagger'
 import { Task } from '../../../ymir-models/src/models'
 
@@ -58,57 +56,10 @@ const schemas = [
   { schemaName: 'question' },
   { schemaName: 'answer' },
 ]
-const userPaths = {
-  tag: 'User',
-  paths: {
-    'user/': {
-      get: {
-        operationId: 'getUserList',
-      },
-      post: {
-        operationId: 'addUser',
-      },
-    },
-    'user/{id}': {
-      get: {
-        operationId: 'getUser',
-      },
-      patch: {
-        operationId: 'updateUser',
-      },
-      delet: {
-        operationId: 'deleteUser',
-      },
-    },
-  },
-}
-const taskPaths = {
-  tag: 'Task',
-  paths: {
-    'task/': {
-      get: {
-        operationId: 'getTaskList',
-      },
-      post: {
-        operationId: 'addTask',
-      },
-    },
-    'task/{id}': {
-      get: {
-        operationId: 'getTask',
-      },
-      patch: {
-        operationId: 'updateTask',
-      },
-      delet: {
-        operationId: 'deleteTask',
-      },
-    },
-  },
-}
 export default {
   components: {
     SchemaManager,
+    CodeView,
   },
   data() {
     return {
@@ -117,10 +68,7 @@ export default {
       schemas,
 
       isAccordion: false,
-      schemaArray: [
-        userPaths,
-        taskPaths,
-      ],
+      currentSchema: null,
     }
   },
   computed: {
@@ -130,6 +78,9 @@ export default {
     // }
   },
   methods: {
+    handleChangeSchema(schema) {
+      this.currentSchema = schema
+    },
     initPage() {
       console.log(swagger)
     },
@@ -146,7 +97,7 @@ export default {
   width: 100%;
   min-height: 100%;
   text-align: left;
-  .view-tree {
+  .left-panel {
     position: absolute;
     left: 0;
     width: 20%;
@@ -161,13 +112,13 @@ export default {
     min-height: 100%;
     padding: 20px;
   }
-  .code-view {
+  .right-panel {
     position: absolute;
     right: 0;
     width: 35%;
     min-height: 100%;
-    padding: 10px 20px;
     border-left: 2px #333 solid;
+    overflow-y: scroll;
   }
 }
 </style>

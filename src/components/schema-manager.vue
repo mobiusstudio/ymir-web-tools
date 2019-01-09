@@ -19,10 +19,15 @@
             v-decorator="['tableName', { initialValue: schemaFormOptions.tableName }]"
           />
         </a-form-item>
+        <a-form-item label="pkey" required>
+          <a-input
+            v-decorator="['pkey', { initialValue: schemaFormOptions.pkey }]"
+          />
+        </a-form-item>
         <a-divider orientation="left">columns</a-divider>
         <template v-for="(item, index) of schemaForm.getFieldsValue().items">
           <div class="schema-column" :key="index">
-            <a-collapse :activeKey="columnActiveKey">
+            <a-collapse>
               <a-collapse-panel :header="getColumnHeader(index)" :key="index">
                 <template v-for="propName of columnPropMap">
                   <a-form-item :label="propName" :key="`${index}_${propName}`" required>
@@ -59,10 +64,10 @@ export default {
       isNew: false,
       isDetail: false,
 
-      columnActiveKey: [],
       schemaFormOptions: {
         schemaName: '',
         tableName: '',
+        pkey: '',
         items: [],
       },
     }
@@ -101,6 +106,16 @@ export default {
       return `${name} <${type}>`
     },
 
+    generateSchema() {
+      const { schemaName, tableName, pkey, items } = this.schemaForm.getFieldsValue()
+      return {
+        schemaName,
+        tableName,
+        pkey,
+        items,
+      }
+    },
+
     initialFormOptions(model) {
       const items = model.columns.items.map((item) => {
         const newItem = {
@@ -114,6 +129,7 @@ export default {
       return {
         schemaName: model.schemaName,
         tableName: model.tableName,
+        pkey: model.pkey,
         items,
       }
     },
@@ -124,10 +140,11 @@ export default {
         props: {
           schemaName: String,
           schemaTable: String,
+          pkey: String,
           items: Array,
         },
-        onFieldsChange: (props, fields) => {
-          this.$emit('change', fields)
+        onFieldsChange: () => {
+          this.$emit('change', this.generateSchema())
         },
       })
       this.schemaFormOptions.items.forEach((item, i) => {
