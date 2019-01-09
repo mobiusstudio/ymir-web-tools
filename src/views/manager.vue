@@ -27,7 +27,7 @@
                     <a-collapse-panel></a-collapse-panel>
                     <a-collapse-panel></a-collapse-panel>
                     <a-collapse-panel></a-collapse-panel>
-                  </a-collapse> 
+                  </a-collapse>
                 </a-collapse-panel>
               </template>
             </template>
@@ -46,7 +46,7 @@
 
 <script>
 import { cloneDeep } from 'lodash'
-import SchemaManager from '../components/schema-manager'
+import SchemaManager from '../components/schema-manager.vue'
 import swagger from '../../swagger/swagger'
 import { Task } from '../../../ymir-models/src/models'
 
@@ -126,7 +126,7 @@ export default {
   computed: {
     // isFuncIn (pathName, funcName, tag) {
     //   console.log('here', pathName, funcName, tag)
-    //   return 
+    //   return
     // }
   },
   methods: {
@@ -151,8 +151,8 @@ export default {
     left: 0;
     width: 20%;
     min-height: 100%;
-    padding: 20px;
     border-right: 2px #333 solid;
+    overflow-y: scroll;
   }
   .content-panel {
     position: absolute;

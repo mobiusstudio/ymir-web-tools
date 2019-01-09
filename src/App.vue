@@ -9,18 +9,19 @@
 </template>
 
 <script>
-import Navigator from '@/components/navigator.vue'
 
 export default {
   name: 'app',
   components: {
-    Navigator,
   },
 }
 </script>
 
 <style lang="less">
 #app {
+  ::-webkit-scrollbar {
+    display: none;
+  }
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -36,7 +37,7 @@ export default {
   .ant-layout-footer {
     height: 64px;
     color: #ddd;
-    background-color: #333;
+    background-color: rgba(0, 0, 0, 0.8)
   }
   .ant-layout-content {
     position: relative;
