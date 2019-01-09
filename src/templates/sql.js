@@ -16,7 +16,7 @@ const sqlizeType = (type) => {
 }
 
 const sqlizeDefault = (def) => {
-  if (!def) return ''
+  if (def === null || def === undefined) return ''
   const value = typeof def === 'string' ? `'${def}'` : def
   return ` DEFAULT ${value}`
 }
@@ -26,7 +26,7 @@ const sqlizeColumn = (items) => {
   items.forEach((item) => {
     const keyName = snakeCase(item.name)
     const keyType = sqlizeType(item.type)
-    const keyDefault = sqlizeDefault(item.default)
+    const keyDefault = sqlizeDefault(item.def)
     const end = item.required ? ' NOT NULL,' : ','
     const string = `${keyName} ${keyType}${keyDefault}${end}`
     strArray.push(string)

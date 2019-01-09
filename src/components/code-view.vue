@@ -1,10 +1,10 @@
 <template>
-  <div class="code-view" defaultActiveKey="2">
+  <div class="code-view" defaultActiveKey="1">
     <a-tabs>
-      <a-tab-pane tab="js" key="1">js code</a-tab-pane>
-      <a-tab-pane tab="sql" key="2">
+      <a-tab-pane tab="sql" key="1">
         <a-textarea :value="sqlCode" autosize></a-textarea>
       </a-tab-pane>
+      <a-tab-pane tab="js" key="2">js code</a-tab-pane>
     </a-tabs>
   </div>
 </template>

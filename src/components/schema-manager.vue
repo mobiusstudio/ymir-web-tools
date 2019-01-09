@@ -24,7 +24,7 @@
             v-decorator="['pkeyIndex', { initialValue: schemaFormOptions.pkeyIndex }]"
           >
             <template v-for="(item, index) of schemaForm.getFieldsValue().items">
-              <a-select-option :value="index" :key="index">{{item.name}}</a-select-option>
+              <a-select-option v-if="item.type === 'id'" :value="index" :key="index">{{item.name}}</a-select-option>
             </template>
           </a-select>
         </a-form-item>
@@ -34,12 +34,36 @@
             <a-collapse>
               <a-collapse-panel :header="getColumnHeader(index)" :key="index">
                 <template v-for="propName of columnPropMap">
-                  <a-form-item :label="propName" :key="`${index}_${propName}`" required>
+                  <a-form-item :label="propName" :key="`${index}_${propName}`" :required="propName === 'name' || propName === 'type'">
                     <a-input
-                    v-decorator="[`items[${index}][${propName}]`, { initialValue: schemaFormOptions.items[index][propName] }]"
+                      v-decorator="[`items[${index}][${propName}]`, { initialValue: schemaFormOptions.items[index][propName] }]"
                     />
                   </a-form-item>
                 </template>
+                <a-form-item label="default" :key="`${index}_def`">
+                  <a-switch
+                    v-if="schemaFormOptions.items[index].type === 'boolean'"
+                    v-decorator="[`items[${index}][def]`, { valuePropName: 'checked', initialValue: schemaFormOptions.items[index].def }]"
+                  />
+                  <a-input-number
+                    style="width:100%;"
+                    v-else-if="schemaFormOptions.items[index].type === 'number' || schemaFormOptions.items[index].type === 'id'"
+                    v-decorator="[`items[${index}][def]`, { initialValue: schemaFormOptions.items[index].def }]"
+                  />
+                  <a-date-picker
+                    v-else-if="schemaFormOptions.items[index].type === 'timestamp'"
+                    v-decorator="[`items[${index}][def]`, { initialValue: schemaFormOptions.items[index].def }]"
+                  />
+                  <a-input
+                    v-else
+                    v-decorator="[`items[${index}][def]`, { initialValue: schemaFormOptions.items[index].def }]"
+                  />
+                </a-form-item>
+                <a-form-item label="required" :key="`${index}_required`">
+                  <a-switch
+                    v-decorator="[`items[${index}][required]`, { valuePropName: 'checked', initialValue: schemaFormOptions.items[index].required }]"
+                  />
+                </a-form-item>
               </a-collapse-panel>
             </a-collapse>
           </div>
@@ -72,7 +96,6 @@ export default {
         schemaName: '',
         tableName: '',
         pkeyIndex: null,
-        pkey: '',
         items: [],
       },
     }
@@ -84,6 +107,7 @@ export default {
 
     handleClickSchema(index) {
       this.initialForm(index)
+      this.$emit('change', this.generateSchema())
       this.showDetail()
     },
 
@@ -103,7 +127,6 @@ export default {
       this.isNew = false
       this.isDetail = true
     },
-
 
     getColumnHeader(index) {
       const name = this.schemaForm.getFieldValue(`items[${index}][name]`)
@@ -125,22 +148,24 @@ export default {
     initialFormOptions(model) {
       let pkeyIndex
       const items = model.columns.items.map((item, index) => {
-        if (item.name === model.pkey) pkeyIndex = index
+        if ((model.pkey && item.name === model.pkey) || item.type === 'id') pkeyIndex = index
         const newItem = {
           name: item.name,
           alias: item.alias,
           foreign: item.foreign,
           type: item.type,
+          def: item.def,
+          required: item.required,
         }
         return newItem
       })
-      return {
+      const res = {
         schemaName: model.schemaName,
         tableName: model.tableName,
         pkeyIndex,
-        pkey: model.pkey,
         items,
       }
+      return res
     },
 
     initialForm(index) {
@@ -148,20 +173,26 @@ export default {
       this.schemaForm = this.$form.createForm(this, {
         props: {
           schemaName: String,
-          schemaTable: String,
+          tableName: String,
           pkeyIndex: Number,
-          pkey: String,
           items: Array,
         },
         onFieldsChange: () => {
           this.$emit('change', this.generateSchema())
         },
       })
+      this.schemaForm.getFieldDecorator('schemaName', { initialValue: this.schemaFormOptions.schemaName })
+      this.schemaForm.getFieldDecorator('tableName', { initialValue: this.schemaFormOptions.tableName })
+      this.schemaForm.getFieldDecorator('pkeyIndex', { initialValue: this.schemaFormOptions.pkeyIndex })
       this.schemaFormOptions.items.forEach((item, i) => {
         this.columnPropMap.forEach((key) => {
           this.schemaForm.getFieldDecorator(`items[${i}][${key}]`, {
             initialValue: item[key],
           })
+        })
+        this.schemaForm.getFieldDecorator(`items[${i}][required]`, {
+          valuePropName: 'checked',
+          initialValue: item.required,
         })
       })
     },
@@ -183,7 +214,7 @@ export default {
     margin-bottom: 8px;
   }
   .schema-btn-special {
-    margin: 10px 0 50px 0;
+    margin: 10px 0 20px 0;
     width: 120px;
     color: whitesmoke;
     background-color: #666;
