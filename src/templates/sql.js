@@ -11,7 +11,8 @@ const sqlizeType = (type) => {
     case 'boolean':
       return 'boolean'
     default:
-      throw new Error(`Invalid type: ${type}`)
+      console.log(`unknown type: ${type}, as string`)
+      return 'string'
   }
 }
 
