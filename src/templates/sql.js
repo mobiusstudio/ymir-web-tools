@@ -35,8 +35,10 @@ const sqlizeColumn = (items) => {
 }
 
 const sqlizeSchema = (schema) => {
-  const { schemaName, tableName, pkey, items } = schema
-  const newItems = items.filter(item => item.name !== pkey)
+  const schemaName = snakeCase(schema.schemaName)
+  const tableName = snakeCase(schema.tableName)
+  const pkey = snakeCase(schema.pkey)
+  const newItems = schema.items.filter(item => item.name !== schema.pkey)
   const columns = sqlizeColumn(newItems)
   // eslint-disable-next-line operator-linebreak
   const code =

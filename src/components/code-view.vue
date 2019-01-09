@@ -27,7 +27,6 @@ export default {
   },
   computed: {
     sqlCode() {
-      console.log(this.schema)
       if (!this.schema) return ''
       return sqlizeSchema(this.schema)
     },

@@ -20,9 +20,13 @@
           />
         </a-form-item>
         <a-form-item label="pkey" required>
-          <a-input
-            v-decorator="['pkey', { initialValue: schemaFormOptions.pkey }]"
-          />
+          <a-select
+            v-decorator="['pkeyIndex', { initialValue: schemaFormOptions.pkeyIndex }]"
+          >
+            <template v-for="(item, index) of schemaForm.getFieldsValue().items">
+              <a-select-option :value="index" :key="index">{{item.name}}</a-select-option>
+            </template>
+          </a-select>
         </a-form-item>
         <a-divider orientation="left">columns</a-divider>
         <template v-for="(item, index) of schemaForm.getFieldsValue().items">
@@ -67,6 +71,7 @@ export default {
       schemaFormOptions: {
         schemaName: '',
         tableName: '',
+        pkeyIndex: null,
         pkey: '',
         items: [],
       },
@@ -107,7 +112,8 @@ export default {
     },
 
     generateSchema() {
-      const { schemaName, tableName, pkey, items } = this.schemaForm.getFieldsValue()
+      const { schemaName, tableName, pkeyIndex, items } = this.schemaForm.getFieldsValue()
+      const pkey = items[pkeyIndex].name
       return {
         schemaName,
         tableName,
@@ -117,7 +123,9 @@ export default {
     },
 
     initialFormOptions(model) {
-      const items = model.columns.items.map((item) => {
+      let pkeyIndex
+      const items = model.columns.items.map((item, index) => {
+        if (item.name === model.pkey) pkeyIndex = index
         const newItem = {
           name: item.name,
           alias: item.alias,
@@ -129,6 +137,7 @@ export default {
       return {
         schemaName: model.schemaName,
         tableName: model.tableName,
+        pkeyIndex,
         pkey: model.pkey,
         items,
       }
@@ -140,6 +149,7 @@ export default {
         props: {
           schemaName: String,
           schemaTable: String,
+          pkeyIndex: Number,
           pkey: String,
           items: Array,
         },
