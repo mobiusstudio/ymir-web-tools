@@ -29,7 +29,7 @@
           </a-select>
         </a-form-item>
         <a-divider orientation="left">columns</a-divider>
-        <a-collapse>
+        <a-collapse :activeKey="activeKey">
           <template v-for="(item, index) of schemaForm.getFieldValue('items')">
             <a-collapse-panel :header="getColumnHeader(index)" :key="index">
               <template v-for="propName of columnPropMap">
@@ -103,6 +103,7 @@ export default {
       columnPropMap,
       isNew: false,
       isDetail: false,
+      activeKey: [],
 
       schemaFormOptions: {
         schemaName: '',
@@ -143,7 +144,7 @@ export default {
         option[`items[${index}][${key}]`] = item[key]
         this.schemaForm.setFieldsValue(option)
       })
-      console.log(this.schemaForm.getFieldValue('items'))
+      this.activeKey = [index]
     },
 
     handleClickSubmit() {
@@ -167,6 +168,7 @@ export default {
     },
 
     generateSchema() {
+      console.log(this.activeKey)
       const { schemaName, tableName, pkeyIndex, items } = this.schemaForm.getFieldsValue()
       const pkey = items[pkeyIndex].name
       return {
