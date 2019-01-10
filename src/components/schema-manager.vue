@@ -8,64 +8,58 @@
     </div>
     <div v-if="isDetail">
       <a-button class="schema-btn-special" @click="handleClickBack">Back</a-button>
-      <a-form @submit="handleClickSubmit" :form="schemaForm" layout="vertical">
+      <a-form @submit="handleClickSubmit" layout="vertical">
         <a-form-item label="schema" required>
-          <a-input
-            v-decorator="['schemaName', { initialValue: schemaFormOptions.schemaName }]"
-          />
+          <a-input v-model="currentSchema.schemaName" @change="handleChangeSchema"/>
         </a-form-item>
         <a-form-item label="table" required>
-          <a-input
-            v-decorator="['tableName', { initialValue: schemaFormOptions.tableName }]"
-          />
+          <a-input v-model="currentSchema.tableName" @change="handleChangeSchema"/>
         </a-form-item>
         <a-form-item label="pkey" required>
-          <a-select
-            v-decorator="['pkeyIndex', { initialValue: schemaFormOptions.pkeyIndex }]"
-          >
-            <template v-for="(column, index) of schemaForm.getFieldValue('columns')">
+          <a-select v-model="currentSchema.pkeyIndex" @change="handleChangeSchema">
+            <template v-for="(column, index) of currentSchema.columns">
               <a-select-option v-if="column.type === 'id'" :value="index" :key="index">{{column.name}}</a-select-option>
             </template>
           </a-select>
         </a-form-item>
         <a-divider orientation="left">columns</a-divider>
         <a-collapse :activeKey="activeKey">
-          <template v-for="(column, index) of schemaForm.getFieldValue('columns')">
-            <a-collapse-panel :key="index">
+          <template v-for="(column, index) of currentSchema.columns">
+            <a-collapse-panel :key="`${index}`">
             <a-row type="flex" justify="space-between" slot="header">
               <a-col><span>{{getColumnHeader(index)}}</span></a-col>
               <a-col style="padding-right:10px;"><a-button type="danger" size="small" shape="circle" icon="minus" @click.stop="handleClickRemoveColumn(index)"/></a-col>
             </a-row>
               <template v-for="propName of columnPropMap">
                 <a-form-item :label="propName" :key="`${index}_${propName}`" :required="propName === 'name' || propName === 'type'">
-                  <a-input
-                    v-decorator="[`columns[${index}][${propName}]`, { initialValue: schemaFormOptions.columns[index][propName] }]"
-                  />
+                  <a-input v-model="currentSchema.columns[index][propName]" @change="handleChangeSchema"/>
                 </a-form-item>
               </template>
               <a-form-item label="default" :key="`${index}_def`" v-if="column.type">
                 <a-switch
-                  v-if="schemaFormOptions.columns[index].type === 'boolean'"
-                  v-decorator="[`columns[${index}][def]`, { valuePropName: 'checked', initialValue: schemaFormOptions.columns[index].def }]"
+                  v-if="currentSchema.columns[index].type === 'boolean'"
+                  v-model="currentSchema.columns[index].def"
+                  @change="handleChangeSchema"
                 />
                 <a-input-number
                   style="width:100%;"
-                  v-else-if="schemaFormOptions.columns[index].type === 'number' || schemaFormOptions.columns[index].type === 'id'"
-                  v-decorator="[`columns[${index}][def]`, { initialValue: schemaFormOptions.columns[index].def }]"
+                  v-else-if="currentSchema.columns[index].type === 'number' || currentSchema.columns[index].type === 'id'"
+                  v-model="currentSchema.columns[index].def"
+                  @change="handleChangeSchema"
                 />
                 <a-date-picker
-                  v-else-if="schemaFormOptions.columns[index].type === 'timestamp'"
-                  v-decorator="[`columns[${index}][def]`, { initialValue: schemaFormOptions.columns[index].def }]"
+                  v-else-if="currentSchema.columns[index].type === 'timestamp'"
+                  v-model="currentSchema.columns[index].def"
+                  @change="handleChangeSchema"
                 />
                 <a-input
                   v-else
-                  v-decorator="[`columns[${index}][def]`, { initialValue: schemaFormOptions.columns[index].def }]"
+                  v-model="currentSchema.columns[index].def"
+                  @change="handleChangeSchema"
                 />
               </a-form-item>
               <a-form-item label="required" :key="`${index}_required`">
-                <a-switch
-                  v-decorator="[`columns[${index}][required]`, { valuePropName: 'checked', initialValue: schemaFormOptions.columns[index].required }]"
-                />
+                <a-switch v-model="currentSchema.columns[index].required" @change="handleChangeSchema"/>
               </a-form-item>
             </a-collapse-panel>
           </template>
@@ -109,7 +103,7 @@ export default {
       isDetail: false,
       activeKey: [],
 
-      schemaFormOptions: {
+      currentSchema: {
         schemaName: '',
         tableName: '',
         pkeyIndex: null,
@@ -124,8 +118,12 @@ export default {
 
     handleClickSchema(index) {
       this.initialForm(index)
-      this.$emit('change', this.generateSchema())
+      this.handleChangeSchema()
       this.showDetail()
+    },
+
+    handleChangeSchema() {
+      this.$emit('change', this.generateSchema())
     },
 
     handleClickBack() {
@@ -139,24 +137,15 @@ export default {
         alias: '',
         foreign: '',
       })
-      const columns = this.schemaForm.getFieldValue('columns')
+      const { columns } = this.currentSchema
       const index = columns.length
-      this.schemaFormOptions.columns[index] = column
-      this.decorateColumn(column, index)
-      columnPropMap.forEach((key) => {
-        const option = {}
-        option[`columns[${index}][${key}]`] = column[key]
-        this.schemaForm.setFieldsValue(option)
-      })
+      this.currentSchema.columns[index] = column
       this.activeKey = [`${index}`]
     },
 
     handleClickRemoveColumn(index) {
-      // const columns = this.schemaForm.getFieldValue('columns')
-      // columns.splice(index, 1)
-      // columns.forEach((column) => {
-
-      // })
+      const { columns } = this.currentSchema
+      columns.splice(index, 1)
     },
 
     handleClickSubmit() {
@@ -173,15 +162,13 @@ export default {
     },
 
     getColumnHeader(index) {
-      const name = this.schemaForm.getFieldValue(`columns[${index}][name]`)
-      const type = this.schemaForm.getFieldValue(`columns[${index}][type]`)
+      const { name, type } = this.currentSchema.columns[index]
       if (name || type) return `${name} ${type ? `<${type}>` : ''}`
       return '...'
     },
 
     generateSchema() {
-      console.log(this.activeKey)
-      const { schemaName, tableName, pkeyIndex, columns } = this.schemaForm.getFieldsValue()
+      const { schemaName, tableName, pkeyIndex, columns } = this.currentSchema
       const pkey = columns[pkeyIndex].name
       return {
         schemaName,
@@ -191,22 +178,7 @@ export default {
       }
     },
 
-    decorateColumn(column, index) {
-      this.columnPropMap.forEach((key) => {
-        this.schemaForm.getFieldDecorator(`columns[${index}][${key}]`, {
-          initialValue: this.schemaFormOptions.columns[index][key] || '',
-        })
-      })
-      const defOptions = { initialValue: this.schemaFormOptions.columns[index].def || null }
-      if (column.type === 'boolean') defOptions.valuePropName = 'checked'
-      this.schemaForm.getFieldDecorator(`columns[${index}][def]`, defOptions)
-      this.schemaForm.getFieldDecorator(`columns[${index}][required]`, {
-        valuePropName: 'checked',
-        initialValue: this.schemaFormOptions.columns[index].required || false,
-      })
-    },
-
-    initialFormOptions(model) {
+    initialCurrentForm(model) {
       let pkeyIndex
       const columns = model.columns.items.map((column, index) => {
         if ((model.pkey && column.name === model.pkey) || column.type === 'id') pkeyIndex = index
@@ -224,24 +196,7 @@ export default {
     },
 
     initialForm(index) {
-      this.schemaFormOptions = this.initialFormOptions(this.schemas[index])
-      this.schemaForm = this.$form.createForm(this, {
-        props: {
-          schemaName: String,
-          tableName: String,
-          pkeyIndex: Number,
-          columns: Array,
-        },
-        onFieldsChange: () => {
-          this.$emit('change', this.generateSchema())
-        },
-      })
-      this.schemaForm.getFieldDecorator('schemaName', { initialValue: this.schemaFormOptions.schemaName })
-      this.schemaForm.getFieldDecorator('tableName', { initialValue: this.schemaFormOptions.tableName })
-      this.schemaForm.getFieldDecorator('pkeyIndex', { initialValue: this.schemaFormOptions.pkeyIndex })
-      this.schemaFormOptions.columns.forEach((column, i) => {
-        this.decorateColumn(column, i)
-      })
+      this.currentSchema = this.initialCurrentForm(this.schemas[index])
     },
   },
   mounted() {
