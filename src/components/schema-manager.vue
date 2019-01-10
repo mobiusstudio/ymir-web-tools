@@ -23,44 +23,48 @@
           <a-select
             v-decorator="['pkeyIndex', { initialValue: schemaFormOptions.pkeyIndex }]"
           >
-            <template v-for="(item, index) of schemaForm.getFieldValue('items')">
-              <a-select-option v-if="item.type === 'id'" :value="index" :key="index">{{item.name}}</a-select-option>
+            <template v-for="(column, index) of schemaForm.getFieldValue('columns')">
+              <a-select-option v-if="column.type === 'id'" :value="index" :key="index">{{column.name}}</a-select-option>
             </template>
           </a-select>
         </a-form-item>
         <a-divider orientation="left">columns</a-divider>
         <a-collapse :activeKey="activeKey">
-          <template v-for="(item, index) of schemaForm.getFieldValue('items')">
-            <a-collapse-panel :header="getColumnHeader(index)" :key="index">
+          <template v-for="(column, index) of schemaForm.getFieldValue('columns')">
+            <a-collapse-panel :key="index">
+            <a-row type="flex" justify="space-between" slot="header">
+              <a-col><span>{{getColumnHeader(index)}}</span></a-col>
+              <a-col style="padding-right:10px;"><a-button type="danger" size="small" shape="circle" icon="minus" @click.stop="handleClickRemoveColumn(index)"/></a-col>
+            </a-row>
               <template v-for="propName of columnPropMap">
                 <a-form-item :label="propName" :key="`${index}_${propName}`" :required="propName === 'name' || propName === 'type'">
                   <a-input
-                    v-decorator="[`items[${index}][${propName}]`, { initialValue: schemaFormOptions.items[index][propName] }]"
+                    v-decorator="[`columns[${index}][${propName}]`, { initialValue: schemaFormOptions.columns[index][propName] }]"
                   />
                 </a-form-item>
               </template>
-              <a-form-item label="default" :key="`${index}_def`" v-if="item.type">
+              <a-form-item label="default" :key="`${index}_def`" v-if="column.type">
                 <a-switch
-                  v-if="schemaFormOptions.items[index].type === 'boolean'"
-                  v-decorator="[`items[${index}][def]`, { valuePropName: 'checked', initialValue: schemaFormOptions.items[index].def }]"
+                  v-if="schemaFormOptions.columns[index].type === 'boolean'"
+                  v-decorator="[`columns[${index}][def]`, { valuePropName: 'checked', initialValue: schemaFormOptions.columns[index].def }]"
                 />
                 <a-input-number
                   style="width:100%;"
-                  v-else-if="schemaFormOptions.items[index].type === 'number' || schemaFormOptions.items[index].type === 'id'"
-                  v-decorator="[`items[${index}][def]`, { initialValue: schemaFormOptions.items[index].def }]"
+                  v-else-if="schemaFormOptions.columns[index].type === 'number' || schemaFormOptions.columns[index].type === 'id'"
+                  v-decorator="[`columns[${index}][def]`, { initialValue: schemaFormOptions.columns[index].def }]"
                 />
                 <a-date-picker
-                  v-else-if="schemaFormOptions.items[index].type === 'timestamp'"
-                  v-decorator="[`items[${index}][def]`, { initialValue: schemaFormOptions.items[index].def }]"
+                  v-else-if="schemaFormOptions.columns[index].type === 'timestamp'"
+                  v-decorator="[`columns[${index}][def]`, { initialValue: schemaFormOptions.columns[index].def }]"
                 />
                 <a-input
                   v-else
-                  v-decorator="[`items[${index}][def]`, { initialValue: schemaFormOptions.items[index].def }]"
+                  v-decorator="[`columns[${index}][def]`, { initialValue: schemaFormOptions.columns[index].def }]"
                 />
               </a-form-item>
               <a-form-item label="required" :key="`${index}_required`">
                 <a-switch
-                  v-decorator="[`items[${index}][required]`, { valuePropName: 'checked', initialValue: schemaFormOptions.items[index].required }]"
+                  v-decorator="[`columns[${index}][required]`, { valuePropName: 'checked', initialValue: schemaFormOptions.columns[index].required }]"
                 />
               </a-form-item>
             </a-collapse-panel>
@@ -81,8 +85,8 @@
 import { capitalize } from 'lodash'
 
 const columnPropMap = ['name', 'type', 'alias', 'foreign']
-const Item = ({ name, type, alias, foreign, def = null, required = false }) => {
-  const item = {
+const Column = ({ name, type, alias, foreign, def = null, required = false }) => {
+  const column = {
     name,
     type,
     alias,
@@ -90,7 +94,7 @@ const Item = ({ name, type, alias, foreign, def = null, required = false }) => {
     def,
     required,
   }
-  return item
+  return column
 }
 
 export default {
@@ -109,7 +113,7 @@ export default {
         schemaName: '',
         tableName: '',
         pkeyIndex: null,
-        items: [],
+        columns: [],
       },
     }
   },
@@ -129,22 +133,30 @@ export default {
     },
 
     handleClickAddColumn() {
-      const item = Item({
+      const column = Column({
         name: '',
         type: '',
         alias: '',
         foreign: '',
       })
-      const items = this.schemaForm.getFieldValue('items')
-      const index = items.length
-      this.schemaFormOptions.items[index] = item
-      this.decorateItem(item, index)
+      const columns = this.schemaForm.getFieldValue('columns')
+      const index = columns.length
+      this.schemaFormOptions.columns[index] = column
+      this.decorateColumn(column, index)
       columnPropMap.forEach((key) => {
         const option = {}
-        option[`items[${index}][${key}]`] = item[key]
+        option[`columns[${index}][${key}]`] = column[key]
         this.schemaForm.setFieldsValue(option)
       })
-      this.activeKey = [index]
+      this.activeKey = [`${index}`]
+    },
+
+    handleClickRemoveColumn(index) {
+      // const columns = this.schemaForm.getFieldValue('columns')
+      // columns.splice(index, 1)
+      // columns.forEach((column) => {
+
+      // })
     },
 
     handleClickSubmit() {
@@ -161,52 +173,52 @@ export default {
     },
 
     getColumnHeader(index) {
-      const name = this.schemaForm.getFieldValue(`items[${index}][name]`)
-      const type = this.schemaForm.getFieldValue(`items[${index}][type]`)
+      const name = this.schemaForm.getFieldValue(`columns[${index}][name]`)
+      const type = this.schemaForm.getFieldValue(`columns[${index}][type]`)
       if (name || type) return `${name} ${type ? `<${type}>` : ''}`
       return '...'
     },
 
     generateSchema() {
       console.log(this.activeKey)
-      const { schemaName, tableName, pkeyIndex, items } = this.schemaForm.getFieldsValue()
-      const pkey = items[pkeyIndex].name
+      const { schemaName, tableName, pkeyIndex, columns } = this.schemaForm.getFieldsValue()
+      const pkey = columns[pkeyIndex].name
       return {
         schemaName,
         tableName,
         pkey,
-        items,
+        columns,
       }
     },
 
-    decorateItem(item, index) {
+    decorateColumn(column, index) {
       this.columnPropMap.forEach((key) => {
-        this.schemaForm.getFieldDecorator(`items[${index}][${key}]`, {
-          initialValue: this.schemaFormOptions.items[index][key] || '',
+        this.schemaForm.getFieldDecorator(`columns[${index}][${key}]`, {
+          initialValue: this.schemaFormOptions.columns[index][key] || '',
         })
       })
-      const defOptions = { initialValue: this.schemaFormOptions.items[index].def || null }
-      if (item.type === 'boolean') defOptions.valuePropName = 'checked'
-      this.schemaForm.getFieldDecorator(`items[${index}][def]`, defOptions)
-      this.schemaForm.getFieldDecorator(`items[${index}][required]`, {
+      const defOptions = { initialValue: this.schemaFormOptions.columns[index].def || null }
+      if (column.type === 'boolean') defOptions.valuePropName = 'checked'
+      this.schemaForm.getFieldDecorator(`columns[${index}][def]`, defOptions)
+      this.schemaForm.getFieldDecorator(`columns[${index}][required]`, {
         valuePropName: 'checked',
-        initialValue: this.schemaFormOptions.items[index].required || false,
+        initialValue: this.schemaFormOptions.columns[index].required || false,
       })
     },
 
     initialFormOptions(model) {
       let pkeyIndex
-      const items = model.columns.items.map((item, index) => {
-        if ((model.pkey && item.name === model.pkey) || item.type === 'id') pkeyIndex = index
-        const { name, type, alias, foreign, def, required } = item
-        const newItem = Item({ name, type, alias, foreign, def, required })
-        return newItem
+      const columns = model.columns.items.map((column, index) => {
+        if ((model.pkey && column.name === model.pkey) || column.type === 'id') pkeyIndex = index
+        const { name, type, alias, foreign, def, required } = column
+        const newColumn = Column({ name, type, alias, foreign, def, required })
+        return newColumn
       })
       const res = {
         schemaName: model.schemaName,
         tableName: model.tableName,
         pkeyIndex,
-        items,
+        columns,
       }
       return res
     },
@@ -218,7 +230,7 @@ export default {
           schemaName: String,
           tableName: String,
           pkeyIndex: Number,
-          items: Array,
+          columns: Array,
         },
         onFieldsChange: () => {
           this.$emit('change', this.generateSchema())
@@ -227,8 +239,8 @@ export default {
       this.schemaForm.getFieldDecorator('schemaName', { initialValue: this.schemaFormOptions.schemaName })
       this.schemaForm.getFieldDecorator('tableName', { initialValue: this.schemaFormOptions.tableName })
       this.schemaForm.getFieldDecorator('pkeyIndex', { initialValue: this.schemaFormOptions.pkeyIndex })
-      this.schemaFormOptions.items.forEach((item, i) => {
-        this.decorateItem(item, i)
+      this.schemaFormOptions.columns.forEach((column, i) => {
+        this.decorateColumn(column, i)
       })
     },
   },

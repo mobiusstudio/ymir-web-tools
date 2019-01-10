@@ -22,13 +22,13 @@ const sqlizeDefault = (def) => {
   return ` DEFAULT ${value}`
 }
 
-const sqlizeColumn = (items) => {
+const sqlizeColumn = (columns) => {
   const strArray = []
-  items.forEach((item) => {
-    const keyName = snakeCase(item.name)
-    const keyType = sqlizeType(item.type)
-    const keyDefault = sqlizeDefault(item.def)
-    const end = item.required ? ' NOT NULL,' : ','
+  columns.forEach((column) => {
+    const keyName = snakeCase(column.name)
+    const keyType = sqlizeType(column.type)
+    const keyDefault = sqlizeDefault(column.def)
+    const end = column.required ? ' NOT NULL,' : ','
     const string = `${keyName} ${keyType}${keyDefault}${end}`
     strArray.push(string)
   })
@@ -39,8 +39,8 @@ const sqlizeSchema = (schema) => {
   const schemaName = snakeCase(schema.schemaName)
   const tableName = snakeCase(schema.tableName)
   const pkey = snakeCase(schema.pkey)
-  const newItems = schema.items.filter(item => item.name !== schema.pkey)
-  const columns = sqlizeColumn(newItems)
+  const newColumns = schema.columns.filter(column => column.name !== schema.pkey)
+  const columns = sqlizeColumn(newColumns)
   // eslint-disable-next-line operator-linebreak
   const code =
 `--------------------------------

@@ -44,7 +44,7 @@ export default {
       schemaName: String,
       tableName: String,
       pkey: String,
-      items: Array,
+      columns: Array,
     },
   },
   data() {
