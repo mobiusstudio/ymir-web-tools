@@ -1,14 +1,14 @@
 <template>
   <div class="schema-manager">
     <div v-if="!isNew && !isDetail">
-      <a-button class="schema-btn-special">New Schema</a-button>
+      <a-button class="schema-btn-special" @click="handleClickAddSchema()">New Schema</a-button>
       <template v-for="(item, index) of schemas">
         <div :key="index"><a-button class="schema-btn" @click="handleClickSchema(index)">{{capitalize(item.schemaName)}}</a-button></div>
       </template>
     </div>
     <div v-if="isDetail">
       <a-button class="schema-btn-special" @click="handleClickBack">Back</a-button>
-      <a-form @submit="handleClickSubmit" layout="vertical">
+      <a-form layout="vertical">
         <a-form-item label="schema" required>
           <a-input v-model="currentSchema.schemaName" @change="handleChangeSchema"/>
         </a-form-item>
@@ -79,7 +79,7 @@
 import { capitalize } from 'lodash'
 
 const columnPropMap = ['name', 'type', 'alias', 'foreign']
-const Column = ({ name, type, alias, foreign, def = null, required = false }) => {
+const Column = ({ name = '', type = '', alias = null, foreign = null, def = null, required = false }) => {
   const column = {
     name,
     type,
@@ -89,6 +89,16 @@ const Column = ({ name, type, alias, foreign, def = null, required = false }) =>
     required,
   }
   return column
+}
+
+const Schema = ({ schemaName = '', tableName = '', pkeyIndex = 0, columns = [new Column({ name: 'id', type: 'id' })] }) => {
+  const schema = {
+    schemaName,
+    tableName,
+    pkeyIndex,
+    columns,
+  }
+  return schema
 }
 
 export default {
@@ -106,8 +116,8 @@ export default {
       currentSchema: {
         schemaName: '',
         tableName: '',
-        pkeyIndex: null,
-        columns: [],
+        pkeyIndex: 0,
+        columns: [new Column({ name: 'id', type: 'id' })],
       },
     }
   },
@@ -116,8 +126,14 @@ export default {
   methods: {
     capitalize,
 
+    handleClickAddSchema() {
+      this.currentSchema = new Schema({})
+      console.log(this.currentSchema)
+      this.showDetail()
+    },
+
     handleClickSchema(index) {
-      this.initialForm(index)
+      this.initialCurrentSchema(schemas[index])
       this.handleChangeSchema()
       this.showDetail()
     },
@@ -131,7 +147,7 @@ export default {
     },
 
     handleClickAddColumn() {
-      const blankColumn = Column({
+      const blankColumn = new Column({
         name: '',
         type: '',
       })
@@ -142,10 +158,6 @@ export default {
     handleClickRemoveColumn(index) {
       const { columns } = this.currentSchema
       columns.splice(index, 1)
-    },
-
-    handleClickSubmit() {
-
     },
 
     showSchemas() {
@@ -174,25 +186,22 @@ export default {
       }
     },
 
-    initialCurrentForm(model) {
-      let pkeyIndex
+    initialCurrentSchema(model) {
+      let pkeyIndex = 0
+      const { schemaName, tableName } = model
       const columns = model.columns.items.map((column, index) => {
         if ((model.pkey && column.name === model.pkey) || column.type === 'id') pkeyIndex = index
         const { name, type, alias, foreign, def, required } = column
-        const newColumn = Column({ name, type, alias, foreign, def, required })
+        const newColumn = new Column({ name, type, alias, foreign, def, required })
         return newColumn
       })
-      const res = {
-        schemaName: model.schemaName,
-        tableName: model.tableName,
+      const schema = new Schema({
+        schemaName,
+        tableName,
         pkeyIndex,
         columns,
-      }
-      return res
-    },
-
-    initialForm(index) {
-      this.currentSchema = this.initialCurrentForm(this.schemas[index])
+      })
+      return schema
     },
   },
   mounted() {
