@@ -133,7 +133,7 @@ export default {
     },
 
     handleClickSchema(index) {
-      this.initialCurrentSchema(schemas[index])
+      this.initialCurrentSchema(this.schemas[index])
       this.handleChangeSchema()
       this.showDetail()
     },
@@ -195,13 +195,12 @@ export default {
         const newColumn = new Column({ name, type, alias, foreign, def, required })
         return newColumn
       })
-      const schema = new Schema({
+      this.currentSchema = new Schema({
         schemaName,
         tableName,
         pkeyIndex,
         columns,
       })
-      return schema
     },
   },
   mounted() {
