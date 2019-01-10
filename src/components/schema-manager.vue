@@ -28,7 +28,7 @@
             <a-collapse-panel :key="`${index}`">
             <a-row type="flex" justify="space-between" slot="header">
               <a-col><span>{{getColumnHeader(index)}}</span></a-col>
-              <a-col style="padding-right:10px;"><a-button type="danger" size="small" shape="circle" icon="minus" @click.stop="handleClickRemoveColumn(index)"/></a-col>
+              <a-col v-if="index > 0" style="padding-right:10px;"><a-button type="danger" size="small" shape="circle" icon="minus" @click.stop="handleClickRemoveColumn(index)"/></a-col>
             </a-row>
               <template v-for="propName of columnPropMap">
                 <a-form-item :label="propName" :key="`${index}_${propName}`" :required="propName === 'name' || propName === 'type'">
@@ -131,15 +131,11 @@ export default {
     },
 
     handleClickAddColumn() {
-      const column = Column({
+      const blankColumn = Column({
         name: '',
         type: '',
-        alias: '',
-        foreign: '',
       })
-      const { columns } = this.currentSchema
-      const index = columns.length
-      this.currentSchema.columns[index] = column
+      const index = this.currentSchema.columns.push(blankColumn) - 1
       this.activeKey = [`${index}`]
     },
 

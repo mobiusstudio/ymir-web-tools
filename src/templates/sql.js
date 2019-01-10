@@ -12,7 +12,7 @@ const sqlizeType = (type) => {
       return 'boolean'
     default:
       console.log(`unknown type: ${type}, as string`)
-      return 'string'
+      return 'varchar'
   }
 }
 
