@@ -1,13 +1,19 @@
 <template>
   <div class="schema-manager">
-    <div v-if="!isNew && !isDetail">
+    <div v-if="!isDetail">
       <a-button class="schema-btn-special" @click="handleClickAddSchema()">New Schema</a-button>
       <template v-for="(item, index) of schemas">
-        <div :key="index"><a-button class="schema-btn" @click="handleClickSchema(index)">{{capitalize(item.schemaName)}}</a-button></div>
+        <a-row :key="index" type="flex" justify="space-between" align="middle">
+          <a-col><a-button class="schema-btn" @click="handleClickSchema(index)">{{capitalize(item.schemaName)}}</a-button></a-col>
+          <a-col><a-button shape="circle" type="danger" icon="minus" @click="handleClickRemoveSchema(index)"></a-button></a-col>
+        </a-row>
       </template>
     </div>
-    <div v-if="isDetail">
-      <a-button class="schema-btn-special" @click="handleClickBack">Back</a-button>
+    <div v-else>
+      <a-row type="flex" justify="space-between">
+        <a-col><a-button class="schema-btn-special" @click="handleClickBack">Back</a-button></a-col>
+        <a-col><a-button class="schema-btn-special" @click="handleClickSave">Save</a-button></a-col>
+      </a-row>
       <a-form layout="vertical">
         <a-form-item label="schema" required>
           <a-input v-model="currentSchema.schemaName" @change="handleChangeSchema"/>
@@ -103,16 +109,14 @@ const Schema = ({ schemaName = '', tableName = '', pkeyIndex = 0, columns = [new
 
 export default {
   name: 'schema-manager',
-  props: {
-    schemas: Array,
-  },
   data() {
     return {
       columnPropMap,
-      isNew: false,
       isDetail: false,
+      schemas: [],
       activeKey: [],
 
+      currentSchemaIndex: false,
       currentSchema: {
         schemaName: '',
         tableName: '',
@@ -127,13 +131,19 @@ export default {
     capitalize,
 
     handleClickAddSchema() {
+      this.currentSchemaIndex = false
       this.currentSchema = new Schema({})
-      console.log(this.currentSchema)
       this.showDetail()
     },
 
+    handleClickRemoveSchema(index) {
+      this.schemas.splice(index, 1)
+      this.saveSchemas()
+    },
+
     handleClickSchema(index) {
-      this.initialCurrentSchema(this.schemas[index])
+      this.currentSchemaIndex = index
+      this.initialCurrentSchema()
       this.handleChangeSchema()
       this.showDetail()
     },
@@ -143,7 +153,15 @@ export default {
     },
 
     handleClickBack() {
+      this.getSchemas()
       this.showSchemas()
+    },
+
+    handleClickSave() {
+      this.cleanSchema()
+      console.log(this.currentSchemaIndex)
+      if (!this.currentSchemaIndex && this.currentSchemaIndex !== 0) this.addSchema()
+      else this.updateSchema()
     },
 
     handleClickAddColumn() {
@@ -169,6 +187,42 @@ export default {
       this.isDetail = true
     },
 
+    cleanSchema() {
+      this.currentSchema.columns.forEach((column, index) => {
+        if (!column.name || !column.type) {
+          this.currentSchema.columns.splice(index, 1)
+          this.cleanSchema()
+        }
+      })
+    },
+
+    getSchemas() {
+      this.schemas = JSON.parse(localStorage.getItem('schemas-data'))
+    },
+
+    saveSchemas() {
+      const buffer = JSON.stringify(this.schemas)
+      localStorage.setItem('schemas-data', buffer)
+      this.$message.success('save successfully')
+    },
+
+    addSchema() {
+      if (this.schemas.every(schema => schema.schemaName !== this.currentSchema.schemaName)) {
+        this.schemas.push(this.currentSchema)
+        this.saveSchemas()
+      } else {
+        this.$message.error(`duplicate schema name: ${this.currentSchema.schemaName}`)
+      }
+    },
+    updateSchema() {
+      if (this.schemas.some((schema, index) => schema.schemaName === this.currentSchema.schemaName && index !== this.currentSchemaIndex)) {
+        this.$message.error(`duplicate schema name: ${this.currentSchema.schemaName}`)
+      } else {
+        this.schemas[this.currentSchemaIndex] = this.currentSchema
+        this.saveSchemas()
+      }
+    },
+
     getColumnHeader(index) {
       const { name, type } = this.currentSchema.columns[index]
       if (name || type) return `${name} ${type ? `<${type}>` : ''}`
@@ -186,24 +240,27 @@ export default {
       }
     },
 
-    initialCurrentSchema(model) {
-      let pkeyIndex = 0
-      const { schemaName, tableName } = model
-      const columns = model.columns.items.map((column, index) => {
-        if ((model.pkey && column.name === model.pkey) || column.type === 'id') pkeyIndex = index
-        const { name, type, alias, foreign, def, required } = column
-        const newColumn = new Column({ name, type, alias, foreign, def, required })
-        return newColumn
-      })
-      this.currentSchema = new Schema({
-        schemaName,
-        tableName,
-        pkeyIndex,
-        columns,
-      })
+    initialCurrentSchema() {
+      this.currentSchema = this.schemas[this.currentSchemaIndex]
+      // let pkeyIndex = 0
+      // const { schemaName, tableName } = model
+      // const columns = model.columns.items.map((column, index) => {
+      //   if ((model.pkey && column.name === model.pkey) || column.type === 'id') pkeyIndex = index
+      //   const { name, type, alias, foreign, def, required } = column
+      //   const newColumn = new Column({ name, type, alias, foreign, def, required })
+      //   return newColumn
+      // })
+      // this.currentSchema = new Schema({
+      //   schemaName,
+      //   tableName,
+      //   pkeyIndex,
+      //   columns,
+      // })
     },
   },
   mounted() {
+    this.getSchemas()
+    console.log(this.schemas)
     // console.log(this.schemas)
   },
 }

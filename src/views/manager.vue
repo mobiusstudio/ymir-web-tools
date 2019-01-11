@@ -1,7 +1,7 @@
 <template>
   <div class="manager">
     <div class="left-panel">
-      <SchemaManager :schemas="schemas" @change="handleChangeSchema"/>
+      <SchemaManager @change="handleChangeSchema"/>
     </div>
     <div class="content-panel">
       <template v-for="(tag, tindex) of newSwagger.tags">
@@ -46,16 +46,16 @@ import { cloneDeep } from 'lodash'
 import SchemaManager from '../components/schema-manager.vue'
 import CodeView from '../components/code-view.vue'
 import swagger from '../../swagger/swagger'
-import { Task } from '../../../ymir-models/src/models'
+// import { Task } from '../../../ymir-models/src/models'
 
 const funcMap = ['get', 'post', 'patch', 'delete']
-const schemas = [
-  new Task(),
-  { schemaName: 'user' },
-  { schemaName: 'profile' },
-  { schemaName: 'question' },
-  { schemaName: 'answer' },
-]
+// const schemas = [
+//   new Task(),
+//   { schemaName: 'user' },
+//   { schemaName: 'profile' },
+//   { schemaName: 'question' },
+//   { schemaName: 'answer' },
+// ]
 export default {
   components: {
     SchemaManager,
@@ -65,7 +65,6 @@ export default {
     return {
       newSwagger: cloneDeep(swagger),
       funcMap,
-      schemas,
 
       isAccordion: false,
       currentSchema: null,
