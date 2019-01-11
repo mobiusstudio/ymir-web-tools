@@ -9,7 +9,6 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "ant-design-vue": "^1.2.4",
     "clipboard": "^2.0.4",
     "is-promise": "^2.1.0",
     "lodash": "^4.17.11",
@@ -32,6 +31,7 @@
     "less": "^3.0.4",
     "less-loader": "^4.1.0",
     "vue-cli-plugin-ant-design": "^1.0.0",
+    "vue-cli-plugin-electron": "0.0.0",
     "vue-template-compiler": "^2.5.21"
   }
 }
