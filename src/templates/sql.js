@@ -1,6 +1,6 @@
 import { snakeCase } from 'lodash'
 
-const sqlizeType = (type) => {
+const generateType = (type) => {
   switch (type) {
     case 'string':
       return 'varchar'
@@ -16,7 +16,7 @@ const sqlizeType = (type) => {
   }
 }
 
-const sqlizeDefault = (def) => {
+const generateDefault = (def) => {
   if (def === null || def === undefined) return ''
   const value = typeof def === 'string' ? `'${def}'` : def
   return ` DEFAULT ${value}`
@@ -26,8 +26,8 @@ const sqlizeColumn = (columns) => {
   const strArray = []
   columns.forEach((column) => {
     const keyName = snakeCase(column.name)
-    const keyType = sqlizeType(column.type)
-    const keyDefault = sqlizeDefault(column.def)
+    const keyType = generateType(column.type)
+    const keyDefault = generateDefault(column.def)
     const end = column.required ? ' NOT NULL,' : ','
     const string = `${keyName} ${keyType}${keyDefault}${end}`
     strArray.push(string)
@@ -35,7 +35,7 @@ const sqlizeColumn = (columns) => {
   return strArray.join('\n  ')
 }
 
-const sqlizeSchema = (schema) => {
+const generateSql = (schema) => {
   const schemaName = snakeCase(schema.schemaName)
   const tableName = snakeCase(schema.tableName)
   const pkey = snakeCase(schema.pkey)
@@ -87,4 +87,4 @@ WITH (
   return code
 }
 
-export default sqlizeSchema
+export default generateSql

@@ -1,69 +1,48 @@
 <template>
   <div
     class="code-view"
-    defaultActiveKey="1"
+    defaultActiveKey="sql"
   >
     <a-tabs>
-      <a-tab-pane
-        tab="sql"
-        key="1"
-      >
-        <a-row
-          type="flex"
-          justify="end"
-          align="middle"
+      <template v-for="view of viewMap">
+        <a-tab-pane
+          :tab="view"
+          :key="view"
         >
-          <a-col>
-            <a-button
-              class="copy-button"
-              type="dashed"
-              shape="circle"
-              icon="copy"
-              @click="handleClickCopy('sql')"
-              data-clipboard-target="#sql-code"
-            />
-          </a-col>
-        </a-row>
-        <a-textarea
-          id="sql-code"
-          :value="sqlCode"
-          autosize
-        />
-      </a-tab-pane>
-      <a-tab-pane
-        tab="js"
-        key="2"
-      >
-        <a-row
-          type="flex"
-          justify="end"
-          align="middle"
-        >
-          <a-col>
-            <a-button
-              class="copy-button"
-              type="dashed"
-              shape="circle"
-              icon="copy"
-              @click="handleClickCopy('model')"
-              data-clipboard-target="#model-code"
-            />
-          </a-col>
-        </a-row>
-        <a-textarea
-          id="model-code"
-          :value="modelCode"
-          autosize
-        />
-      </a-tab-pane>
+          <a-row
+            type="flex"
+            justify="end"
+            align="middle"
+          >
+            <a-col>
+              <a-button
+                class="copy-button"
+                type="dashed"
+                shape="circle"
+                icon="copy"
+                @click="handleClickCopy(view)"
+                :data-clipboard-target="`#${view}-code`"
+              />
+            </a-col>
+          </a-row>
+          <a-textarea
+            :id="`${view}-code`"
+            :value="generateCode(view)"
+            autosize
+          />
+        </a-tab-pane>
+      </template>
     </a-tabs>
   </div>
 </template>
 
 <script>
 import Clipboard from 'clipboard'
-import sqlizeSchema from '../templates/sql'
-import modelizeSchema from '../templates/model'
+import generateSql from '../templates/sql'
+import generateModel from '../templates/model'
+import generateController from '../templates/controller'
+
+const viewMap = ['sql', 'model', 'controller']
 
 export default {
   props: {
@@ -78,16 +57,21 @@ export default {
   },
   data() {
     return {
+      viewMap,
     }
   },
   computed: {
     sqlCode() {
       if (!this.schema) return ''
-      return sqlizeSchema(this.schema)
+      return generateSql(this.schema)
     },
     modelCode() {
       if (!this.schema) return ''
-      return modelizeSchema(this.schema)
+      return generateModel(this.schema)
+    },
+    controllerCode() {
+      if (!this.schema) return ''
+      return generateController(this.schema)
     },
   },
   methods: {
@@ -98,6 +82,18 @@ export default {
       this.clipboard.on('error', () => {
         this.$message.error('copy failed.')
       })
+    },
+    generateCode(view) {
+      if (!this.schema) return ''
+      switch (view) {
+        case 'sql':
+          return generateSql(this.schema)
+        case 'model':
+          return generateModel(this.schema)
+        case 'controller':
+          return generateController(this.schema)
+        default: return ''
+      }
     },
   },
   mounted() {
