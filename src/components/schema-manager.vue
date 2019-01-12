@@ -298,7 +298,7 @@ export default {
     },
 
     getSchemas() {
-      this.schemas = JSON.parse(localStorage.getItem('schemas-data'))
+      this.schemas = JSON.parse(localStorage.getItem('schemas-data')) || []
     },
 
     saveSchemas() {
