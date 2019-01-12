@@ -76,11 +76,17 @@ export default {
   },
   methods: {
     handleClickCopy(contentType) {
-      this.clipboard.on('success', () => {
-        this.$message.success(`copy ${contentType} to clipboard.`)
+      console.log('click')
+      this.clipboard.on('success', (e) => {
+        this.$message.success(`${e.action} ${contentType} to clipboard.`)
+        console.log(e)
+        e.clearSelection()
+        this.clipboard.off('success')
       })
-      this.clipboard.on('error', () => {
-        this.$message.error('copy failed.')
+      this.clipboard.on('error', (e) => {
+        this.$message.error(`${e.action} failed.`)
+        e.clearSelection()
+        this.clipboard.off('error')
       })
     },
     generateCode(view) {
