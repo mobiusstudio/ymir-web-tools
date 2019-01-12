@@ -5,7 +5,7 @@
     </div>
     <div class="content-panel">
       <ContentSwagger v-if="isSwagger" />
-      <ContentSchema v-if="isSchema" />
+      <ContentTable v-if="isSchema" :sindex="0" :tindex="0" />
     </div>
     <div class="right-panel">
       <CodeView :schema="currentSchema" />
@@ -17,14 +17,14 @@
 import Explorer from '../components/explorer.vue'
 import CodeView from '../components/code-view.vue'
 import ContentSwagger from '../components/content-swagger.vue'
-import ContentSchema from '../components/content-schema.vue'
+import ContentTable from '../components/content-table.vue'
 
 export default {
   components: {
     Explorer,
     CodeView,
     ContentSwagger,
-    ContentSchema,
+    ContentTable,
   },
   data() {
     return {
