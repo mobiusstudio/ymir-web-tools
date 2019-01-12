@@ -1,7 +1,7 @@
 <template>
   <div class="manager">
     <div class="left-panel">
-      <SchemaManager @change="handleChangeSchema" />
+      <Explorer @change="handleChangeSchema" />
     </div>
     <div class="content-panel">
       <template v-for="(tag, tindex) of newSwagger.tags">
@@ -28,10 +28,6 @@
                       </div>
                       <p>text......</p>
                     </a-collapse-panel>
-                    <a-collapse-panel />
-                    <a-collapse-panel />
-                    <a-collapse-panel />
-                    <a-collapse-panel />
                   </a-collapse>
                 </a-collapse-panel>
               </template>
@@ -48,7 +44,7 @@
 
 <script>
 import { cloneDeep } from 'lodash'
-import SchemaManager from '../components/schema-manager.vue'
+import Explorer from '../components/explorer.vue'
 import CodeView from '../components/code-view.vue'
 import swagger from '../../swagger/swagger'
 // import { Task } from '../../../ymir-models/src/models'
@@ -63,7 +59,7 @@ const funcMap = ['get', 'post', 'patch', 'delete']
 // ]
 export default {
   components: {
-    SchemaManager,
+    Explorer,
     CodeView,
   },
   data() {
