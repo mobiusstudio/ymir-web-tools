@@ -19,7 +19,7 @@
               class="schema-btn"
               @click="handleClickSchema(index)"
             >
-              {{ capitalize(item.schemaName) }}
+              {{ upperFirst(item.schemaName) }}
             </a-button>
           </a-col>
           <a-col>
@@ -183,7 +183,7 @@
 </template>
 
 <script>
-import { capitalize } from 'lodash'
+import { upperFirst } from 'lodash'
 
 const columnPropMap = ['name', 'type', 'alias', 'foreign']
 const Column = ({ name = '', type = '', alias = null, foreign = null, def = null, required = false }) => {
@@ -229,7 +229,7 @@ export default {
   computed: {
   },
   methods: {
-    capitalize,
+    upperFirst,
 
     handleClickAddSchema() {
       this.currentSchemaIndex = false

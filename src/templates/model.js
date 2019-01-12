@@ -1,3 +1,5 @@
+import { upperFirst } from 'lodash'
+
 const modelizeColumns = (columns) => {
   const columnArray = []
   columns.forEach((column) => {
@@ -26,7 +28,7 @@ const modelizeSchema = (schema) => {
   const code =
 `import { DatabaseTable, Column, ColumnArray } from './core'
 
-export class Task extends DatabaseTable {
+export class ${upperFirst(tableName)} extends DatabaseTable {
   constructor() {
     super('${schemaName}', '${tableName}')
     this.columns = new ColumnArray([
