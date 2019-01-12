@@ -1,47 +1,140 @@
 <template>
   <div class="schema-manager">
     <div v-if="!isDetail">
-      <a-button class="schema-btn-special" @click="handleClickAddSchema()">New Schema</a-button>
+      <a-button
+        class="schema-btn-special"
+        @click="handleClickAddSchema()"
+      >
+        New Schema
+      </a-button>
       <template v-for="(item, index) of schemas">
-        <a-row :key="index" type="flex" justify="space-between" align="middle">
-          <a-col><a-button class="schema-btn" @click="handleClickSchema(index)">{{capitalize(item.schemaName)}}</a-button></a-col>
-          <a-col><a-button shape="circle" type="danger" icon="minus" @click="handleClickRemoveSchema(index)"></a-button></a-col>
+        <a-row
+          :key="index"
+          type="flex"
+          justify="space-between"
+          align="middle"
+        >
+          <a-col>
+            <a-button
+              class="schema-btn"
+              @click="handleClickSchema(index)"
+            >
+              {{ capitalize(item.schemaName) }}
+            </a-button>
+          </a-col>
+          <a-col>
+            <a-button
+              shape="circle"
+              type="danger"
+              icon="minus"
+              @click="handleClickRemoveSchema(index)"
+            />
+          </a-col>
         </a-row>
       </template>
     </div>
     <div v-else>
-      <a-row type="flex" justify="space-between">
-        <a-col><a-button class="schema-btn-special" @click="handleClickBack">Back</a-button></a-col>
-        <a-col><a-button class="schema-btn-special" @click="handleClickSave">Save</a-button></a-col>
+      <a-row
+        type="flex"
+        justify="space-between"
+      >
+        <a-col>
+          <a-button
+            class="schema-btn-special"
+            @click="handleClickBack"
+          >
+            Back
+          </a-button>
+        </a-col>
+        <a-col>
+          <a-button
+            class="schema-btn-special"
+            @click="handleClickSave"
+          >
+            Save
+          </a-button>
+        </a-col>
       </a-row>
       <a-form layout="vertical">
-        <a-form-item label="schema" required>
-          <a-input v-model="currentSchema.schemaName" @change="handleChangeSchema"/>
+        <a-form-item
+          label="schema"
+          required
+        >
+          <a-input
+            v-model="currentSchema.schemaName"
+            @change="handleChangeSchema"
+          />
         </a-form-item>
-        <a-form-item label="table" required>
-          <a-input v-model="currentSchema.tableName" @change="handleChangeSchema"/>
+        <a-form-item
+          label="table"
+          required
+        >
+          <a-input
+            v-model="currentSchema.tableName"
+            @change="handleChangeSchema"
+          />
         </a-form-item>
-        <a-form-item label="pkey" required>
-          <a-select v-model="currentSchema.pkeyIndex" @change="handleChangeSchema">
+        <a-form-item
+          label="pkey"
+          required
+        >
+          <a-select
+            v-model="currentSchema.pkeyIndex"
+            @change="handleChangeSchema"
+          >
             <template v-for="(column, index) of currentSchema.columns">
-              <a-select-option v-if="column.type === 'id'" :value="index" :key="index">{{column.name}}</a-select-option>
+              <a-select-option
+                v-if="column.type === 'id'"
+                :value="index"
+                :key="index"
+              >
+                {{ column.name }}
+              </a-select-option>
             </template>
           </a-select>
         </a-form-item>
-        <a-divider orientation="left">columns</a-divider>
-        <a-collapse :activeKey="activeKey">
+        <a-divider orientation="left">
+          columns
+        </a-divider>
+        <a-collapse :active-key="activeKey">
           <template v-for="(column, index) of currentSchema.columns">
             <a-collapse-panel :key="`${index}`">
-            <a-row type="flex" justify="space-between" slot="header">
-              <a-col><span>{{getColumnHeader(index)}}</span></a-col>
-              <a-col v-if="index > 0" style="padding-right:10px;"><a-button type="danger" size="small" shape="circle" icon="minus" @click.stop="handleClickRemoveColumn(index)"/></a-col>
-            </a-row>
+              <a-row
+                type="flex"
+                justify="space-between"
+                slot="header"
+              >
+                <a-col><span>{{ getColumnHeader(index) }}</span></a-col>
+                <a-col
+                  v-if="index > 0"
+                  style="padding-right:10px;"
+                >
+                  <a-button
+                    type="danger"
+                    size="small"
+                    shape="circle"
+                    icon="minus"
+                    @click.stop="handleClickRemoveColumn(index)"
+                  />
+                </a-col>
+              </a-row>
               <template v-for="propName of columnPropMap">
-                <a-form-item :label="propName" :key="`${index}_${propName}`" :required="propName === 'name' || propName === 'type'">
-                  <a-input v-model="currentSchema.columns[index][propName]" @change="handleChangeSchema"/>
+                <a-form-item
+                  :label="propName"
+                  :key="`${index}_${propName}`"
+                  :required="propName === 'name' || propName === 'type'"
+                >
+                  <a-input
+                    v-model="currentSchema.columns[index][propName]"
+                    @change="handleChangeSchema"
+                  />
                 </a-form-item>
               </template>
-              <a-form-item label="default" :key="`${index}_def`" v-if="column.type">
+              <a-form-item
+                label="default"
+                :key="`${index}_def`"
+                v-if="column.type"
+              >
                 <a-switch
                   v-if="currentSchema.columns[index].type === 'boolean'"
                   v-model="currentSchema.columns[index].def"
@@ -64,20 +157,28 @@
                   @change="handleChangeSchema"
                 />
               </a-form-item>
-              <a-form-item label="required" :key="`${index}_required`">
-                <a-switch v-model="currentSchema.columns[index].required" @change="handleChangeSchema"/>
+              <a-form-item
+                label="required"
+                :key="`${index}_required`"
+              >
+                <a-switch
+                  v-model="currentSchema.columns[index].required"
+                  @change="handleChangeSchema"
+                />
               </a-form-item>
             </a-collapse-panel>
           </template>
         </a-collapse>
         <a-divider orientation="right">
-          <a-button shape="circle" icon="plus" @click="handleClickAddColumn"></a-button>
+          <a-button
+            shape="circle"
+            icon="plus"
+            @click="handleClickAddColumn"
+          />
         </a-divider>
       </a-form>
     </div>
-    <div>
-
-    </div>
+    <div />
   </div>
 </template>
 
@@ -108,7 +209,7 @@ const Schema = ({ schemaName = '', tableName = '', pkeyIndex = 0, columns = [new
 }
 
 export default {
-  name: 'schema-manager',
+  name: 'SchemaManager',
   data() {
     return {
       columnPropMap,

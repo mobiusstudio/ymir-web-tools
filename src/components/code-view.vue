@@ -1,33 +1,60 @@
 <template>
-  <div class="code-view" defaultActiveKey="1">
+  <div
+    class="code-view"
+    defaultActiveKey="1"
+  >
     <a-tabs>
-      <a-tab-pane tab="sql" key="1">
-        <a-row type="flex" justify="end" align="middle">
+      <a-tab-pane
+        tab="sql"
+        key="1"
+      >
+        <a-row
+          type="flex"
+          justify="end"
+          align="middle"
+        >
           <a-col>
             <a-button
               class="copy-button"
-              type="dashed" shape="circle"
+              type="dashed"
+              shape="circle"
               icon="copy"
               @click="handleClickCopy('sql')"
               data-clipboard-target="#sql-code"
             />
           </a-col>
         </a-row>
-        <a-textarea id="sql-code" :value="sqlCode" autosize></a-textarea>
+        <a-textarea
+          id="sql-code"
+          :value="sqlCode"
+          autosize
+        />
       </a-tab-pane>
-      <a-tab-pane tab="js" key="2">
-        <a-row type="flex" justify="end" align="middle">
+      <a-tab-pane
+        tab="js"
+        key="2"
+      >
+        <a-row
+          type="flex"
+          justify="end"
+          align="middle"
+        >
           <a-col>
             <a-button
               class="copy-button"
-              type="dashed" shape="circle"
+              type="dashed"
+              shape="circle"
               icon="copy"
               @click="handleClickCopy('model')"
               data-clipboard-target="#model-code"
             />
           </a-col>
         </a-row>
-        <a-textarea id="model-code" :value="modelCode" autosize></a-textarea>
+        <a-textarea
+          id="model-code"
+          :value="modelCode"
+          autosize
+        />
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -41,6 +68,8 @@ import modelizeSchema from '../templates/model'
 export default {
   props: {
     schema: {
+      type: Object,
+      default: null,
       schemaName: String,
       tableName: String,
       pkey: String,

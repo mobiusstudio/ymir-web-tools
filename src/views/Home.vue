@@ -1,15 +1,21 @@
 <template>
   <div class="home">
-    <div><a-button type="primary" @click="handleClickManager()">Manager</a-button></div>
+    <div>
+      <a-button
+        type="primary"
+        @click="handleClickManager()"
+      >
+        Manager
+      </a-button>
+    </div>
   </div>
 </template>
 
 <script>
 
 export default {
-  name: 'home',
+  name: 'Home',
   components: {
-    Navigator,
   },
 
   data() {

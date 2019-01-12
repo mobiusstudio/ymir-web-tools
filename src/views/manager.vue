@@ -1,32 +1,37 @@
 <template>
   <div class="manager">
     <div class="left-panel">
-      <SchemaManager @change="handleChangeSchema"/>
+      <SchemaManager @change="handleChangeSchema" />
     </div>
     <div class="content-panel">
       <template v-for="(tag, tindex) of newSwagger.tags">
         <div :key="tindex">
-          <a-divider orientation="left">{{tag.name}}</a-divider>
+          <a-divider orientation="left">
+            {{ tag.name }}
+          </a-divider>
           <a-collapse :accordion="isAccordion">
             <template v-for="(pathName, pindex) of Object.keys(newSwagger.paths)">
               <template v-for="(funcName, findex) of funcMap">
-                <a-collapse-panel :key="`${pindex}_${findex}`" v-if="newSwagger.paths[pathName][funcName] && newSwagger.paths[pathName][funcName].tags.includes(tag.name)">
+                <a-collapse-panel
+                  :key="`${pindex}_${findex}`"
+                  v-if="newSwagger.paths[pathName][funcName] && newSwagger.paths[pathName][funcName].tags.includes(tag.name)"
+                >
                   <div slot="header">
-                    <span>{{funcName.toUpperCase()}}: </span>
-                    <span>{{pathName}}</span>
+                    <span>{{ funcName.toUpperCase() }}: </span>
+                    <span>{{ pathName }}</span>
                   </div>
                   <a-collapse :accordion="isAccordion">
                     <a-collapse-panel>
                       <div slot="header">
                         <span>operationId: </span>
-                        <span>{{newSwagger.paths[pathName][funcName].operationId}}</span>
+                        <span>{{ newSwagger.paths[pathName][funcName].operationId }}</span>
                       </div>
                       <p>text......</p>
                     </a-collapse-panel>
-                    <a-collapse-panel></a-collapse-panel>
-                    <a-collapse-panel></a-collapse-panel>
-                    <a-collapse-panel></a-collapse-panel>
-                    <a-collapse-panel></a-collapse-panel>
+                    <a-collapse-panel />
+                    <a-collapse-panel />
+                    <a-collapse-panel />
+                    <a-collapse-panel />
                   </a-collapse>
                 </a-collapse-panel>
               </template>
@@ -36,7 +41,7 @@
       </template>
     </div>
     <div class="right-panel">
-      <CodeView :schema="currentSchema"/>
+      <CodeView :schema="currentSchema" />
     </div>
   </div>
 </template>
