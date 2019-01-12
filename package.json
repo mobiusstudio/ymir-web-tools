@@ -2,9 +2,19 @@
   "name": "ymir-web-tools",
   "version": "0.1.0",
   "private": true,
+  "author": {
+    "name": "Canh Kieu",
+    "email": "canhkieu@azwebplus.com"
+  },
   "scripts": {
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
+    "dev": "npm run electron-serve",
+    "electron": "electron .",
+    "electron-builder": "electron-builder",
+    "electron-prod": "vue-cli-service electron-prod",
+    "electron-serve": "vue-cli-service electron-serve",
+    "prod": "npm run electron-prod",
     "start": "vue-cli-service serve",
     "test:unit": "vue-cli-service test:unit"
   },
@@ -25,13 +35,54 @@
     "@vue/test-utils": "^1.0.0-beta.20",
     "babel-eslint": "^10.0.1",
     "chai": "^4.1.2",
+    "electron": "^2.0.2",
+    "electron-builder": "^20.18.0",
+    "electron-devtools-installer": "^2.2.4",
     "eslint": "^5.8.0",
     "eslint-plugin-mocha": "^5.2.1",
     "eslint-plugin-vue": "^5.0.0",
     "less": "^3.0.4",
     "less-loader": "^4.1.0",
     "vue-cli-plugin-ant-design": "^1.0.0",
-    "vue-cli-plugin-electron": "0.0.0",
+    "vue-cli-plugin-vuetify-electron": "0.0.7",
     "vue-template-compiler": "^2.5.21"
-  }
+  },
+  "build": {
+    "appId": "com.example.app",
+    "productName": "Electron App",
+    "copyright": "Copyright © 2018",
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/*",
+      "build/icons/icon.*"
+    ],
+    "mac": {
+      "icon": "build/icons/icon.icns"
+    },
+    "win": {
+      "icon": "build/icons/icon.ico"
+    },
+    "linux": {
+      "icon": "build/icons"
+    }
+  },
+  "main": "./electron/index.js"
 }
