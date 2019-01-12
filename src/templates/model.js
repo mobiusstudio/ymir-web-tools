@@ -25,7 +25,7 @@ const modelizeColumns = (columns) => {
 const modelizeSchema = (schema) => {
   const { schemaName, tableName, columns } = schema
   // eslint-disable-next-line operator-linebreak
-  const code =
+  const code = // TODO: path should be smart
 `import { DatabaseTable, Column, ColumnArray } from './core'
 
 export class ${upperFirst(tableName)} extends DatabaseTable {
