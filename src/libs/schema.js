@@ -16,7 +16,7 @@ export class Column extends BaseColumn {
   static propMap = ['type', 'name', 'alias', 'foreign']
 }
 
-export class Schema {
+export class Table {
   constructor({
     schemaName,
     tableName,
@@ -30,5 +30,12 @@ export class Schema {
     this.tableName = tableName
     this.pkeyIndex = pkeyIndex
     this.columns = columns
+  }
+}
+
+export class Schema {
+  constructor({ schemaName, tables = [] }) {
+    this.schemaName = schemaName
+    this.tables = tables
   }
 }

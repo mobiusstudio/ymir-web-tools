@@ -1,5 +1,13 @@
 <template>
-  <div>schema-content</div>
+  <a-row type="flex" justify="space-between">
+    <a-col :span="4" class="column-list">
+      <a-divider>
+        columns
+      </a-divider>
+    </a-col>
+    <a-col :span="20" class="column-detail">
+    </a-col>
+  </a-row>
 </template>
 
 <script>
