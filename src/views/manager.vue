@@ -58,14 +58,14 @@ export default {
   .left-panel {
     position: absolute;
     left: 0;
-    width: 25%;
+    width: 15%;
     min-height: 100%;
     border-right: 2px #333 solid;
     overflow-y: scroll;
   }
   .content-panel {
     position: absolute;
-    left: 25%;
+    left: 15%;
     right: 35%;
     min-height: 100%;
     padding: 20px;
