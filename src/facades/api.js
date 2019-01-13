@@ -72,7 +72,7 @@ api.table = {
     const tableArray = getTableArray(location.schema)
     return tableArray
   },
-  get: async (location) => {
+  get: (location) => {
     const tableArray = getTableArray(location.schema)
     return tableArray[location.table]
   },

@@ -49,6 +49,9 @@ export default {
     },
   },
   mounted() {
+    // const { fakeSchemaArray } = require('../mock/schema')
+    // const buffer = JSON.stringify(fakeSchemaArray)
+    // localStorage.setItem('schemas-data', buffer)
   },
 }
 </script>

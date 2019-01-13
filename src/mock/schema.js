@@ -10,18 +10,18 @@ export const fakeSchemaArray = [
         columns: [
           new Column({
             table: 'account',
-            type: 'number',
+            columnType: 'number',
             name: 'id',
           }),
           new Column({
             table: 'account',
-            type: 'username',
-            name: 'string',
+            columnType: 'string',
+            name: 'username',
           }),
           new Column({
             table: 'account',
-            type: 'password',
-            name: 'string',
+            columnType: 'string',
+            name: 'password',
           }),
         ],
       }),
@@ -31,19 +31,19 @@ export const fakeSchemaArray = [
         columns: [
           new Column({
             table: 'profile',
-            type: 'number',
+            columnType: 'number',
             name: 'id',
             foreign: '"user".account.id',
           }),
           new Column({
             table: 'profile',
-            type: 'name',
-            name: 'string',
+            columnType: 'string',
+            name: 'name',
           }),
           new Column({
             table: 'profile',
-            type: 'age',
-            name: 'number',
+            columnType: 'number',
+            name: 'age',
           }),
         ],
       }),

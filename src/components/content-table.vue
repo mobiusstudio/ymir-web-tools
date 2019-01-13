@@ -8,6 +8,9 @@
         <a-row type="flex" justify="center">
           <a-form>
             <a-button-group>
+              <a-button @click="test">
+                test
+              </a-button>
               <template v-for="(column, index) of currentTable.columns">
                 <a-form-item :key="index">
                   <a-button
@@ -48,7 +51,7 @@ export default {
     TableDetail,
   },
   props: {
-    locaction: {
+    location: {
       type: Object,
       default: () => ({ schema: 0, table: 0 }),
       schema: {
@@ -68,15 +71,21 @@ export default {
     }
   },
   watch: {
-    location: () => {
-      console.log(this.location)
-      this.getTable()
+    location: {
+      handler() {
+        this.getTable()
+      },
+      deep: true,
     },
   },
   methods: {
+    test() {
+      console.log(this.location.schema, this.location.table)
+    },
+
     generateColumnButtonText(index) {
-      const { name = 'column', columnType = 'type' } = this.currentTable.columns[index]
-      if (name || columnType) return `${name} <${columnType}>`
+      const { name = 'column', type = 'type' } = this.currentTable.columns[index]
+      if (name || type) return `${name} <${type}>`
       return '...'
     },
 
@@ -92,9 +101,7 @@ export default {
     async getTable() {
       try {
         const res = await api.table.get(this.location)
-        console.log(res)
         this.currentTable = res
-        console.log(res)
       } catch (error) {
         this.$message.error(error.message)
       }
@@ -110,7 +117,7 @@ export default {
     },
     async deleteTable() {
       try {
-        const res = await api.schema.delete(this.location)
+        const res = await api.table.delete(this.location)
         console.log(res)
         this.$message.success(`Delete schema ${this.currentTable.tableName}`)
       } catch (error) {
