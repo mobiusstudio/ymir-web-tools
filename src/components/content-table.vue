@@ -82,19 +82,27 @@ export default {
       return '...'
     },
 
-    handleChangeColumn(column) {
-      this.currentTable.columns[this.currentColumnIndex] = column
-      this.$emit('change', column)
-    },
-
     handleClickColumn(index) {
       this.currentColumnIndex = index
+    },
+
+    handleChangeColumn(column) {
+      this.currentTable.columns[this.currentColumnIndex] = column
+      this.commitTable()
+    },
+
+    commitTable() {
+      this.$store.commit('change-table', {
+        table: this.currentTable,
+      })
     },
 
     async getTable() {
       try {
         const res = await api.table.get(this.location)
         this.currentTable = res
+        this.commitTable()
+        console.log(this.currentTable)
       } catch (error) {
         this.$message.error(error.message)
       }

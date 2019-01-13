@@ -137,7 +137,7 @@ export default {
     },
 
     handleChangeSchema() {
-      this.$store.commit('change-schema', this.currentSchema)
+      this.$emit('change', this.currentSchema)
     },
 
     handleClickAddTable() {

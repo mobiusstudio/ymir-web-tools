@@ -47,6 +47,10 @@ export default {
         this.isSchema = false
       }
     },
+    handleChangeTable() {
+    },
+    handleChangeSchema() {
+    },
   },
   mounted() {
     // const { fakeSchemaArray } = require('../mock/schema')

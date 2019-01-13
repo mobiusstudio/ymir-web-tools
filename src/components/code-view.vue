@@ -45,34 +45,10 @@ import generateController from '../templates/controller'
 const viewMap = ['sql', 'model', 'controller']
 
 export default {
-  props: {
-    schema: {
-      type: Object,
-      default: null,
-      schemaName: String,
-      tableName: String,
-      pkey: String,
-      columns: Array,
-    },
-  },
   data() {
     return {
       viewMap,
     }
-  },
-  computed: {
-    sqlCode() {
-      if (!this.schema) return ''
-      return generateSql(this.schema)
-    },
-    modelCode() {
-      if (!this.schema) return ''
-      return generateModel(this.schema)
-    },
-    controllerCode() {
-      if (!this.schema) return ''
-      return generateController(this.schema)
-    },
   },
   methods: {
     handleClickCopy(contentType) {
@@ -90,14 +66,15 @@ export default {
       })
     },
     generateCode(view) {
-      if (!this.schema) return ''
+      const { table } = this.$store.state
+      if (!table) return ''
       switch (view) {
         case 'sql':
-          return generateSql(this.schema)
+          return generateSql(table)
         case 'model':
-          return generateModel(this.schema)
+          return generateModel(table)
         case 'controller':
-          return generateController(this.schema)
+          return generateController(table)
         default: return ''
       }
     },

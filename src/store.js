@@ -6,14 +6,13 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    schema: null,
     table: null,
   },
   getters: {
   },
   mutations: {
-    'change-schema': (state, payload) => {
-      state.schema = payload.schema
+    'change-table': (state, payload) => {
+      state.table = payload.table
     },
   },
   actions: {
