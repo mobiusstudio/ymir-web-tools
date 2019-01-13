@@ -1,14 +1,14 @@
 <template>
   <div class="manager">
     <div class="left-panel">
-      <Explorer @change="handleChangeSchema" />
+      <Explorer @select="handleSelectTable" />
     </div>
     <div class="content-panel">
       <ContentSwagger v-if="isSwagger" />
-      <ContentTable v-if="isSchema" :sindex="0" :tindex="0" />
+      <ContentTable v-if="isSchema" :location="location" />
     </div>
     <div class="right-panel">
-      <CodeView :schema="currentSchema" />
+      <CodeView />
     </div>
   </div>
 </template>
@@ -29,19 +29,23 @@ export default {
   data() {
     return {
       isSwagger: false,
-      isSchema: true,
-      currentSchema: null,
+      isSchema: false,
+      location: {
+        schema: 0,
+        table: 0,
+      },
     }
   },
   computed: {
-    // isFuncIn (pathName, funcName, tag) {
-    //   console.log('here', pathName, funcName, tag)
-    //   return
-    // }
   },
   methods: {
-    handleChangeSchema(schema) {
-      this.currentSchema = schema
+    handleSelectTable(location) {
+      if (location) {
+        if (!this.isSchema) this.isSchema = true
+        this.location = location
+      } else {
+        this.isSchema = false
+      }
     },
   },
   mounted() {

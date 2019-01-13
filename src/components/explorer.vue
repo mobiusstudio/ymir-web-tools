@@ -1,63 +1,53 @@
 <template>
   <div class="schema-manager">
-    <div v-if="!isDetail">
-      <a-button
-        class="schema-btn-special"
-        @click="handleClickAddSchema()"
-      >
-        New Schema
-      </a-button>
-      <template v-for="(item, index) of schemas">
-        <a-row
-          :key="index"
-          type="flex"
-          justify="space-between"
-          align="middle"
-        >
-          <a-col>
-            <a-button
-              class="schema-btn"
-              @click="handleClickSchema(index)"
-            >
-              {{ upperFirst(item.schemaName) }}
-            </a-button>
-          </a-col>
-          <a-col>
-            <a-button
-              shape="circle"
-              type="danger"
-              icon="minus"
-              @click="handleClickRemoveSchema(index)"
-            />
-          </a-col>
-        </a-row>
-      </template>
+    <div v-if="isSchema">
+      <a-divider>
+        schema list
+      </a-divider>
+      <a-row type="flex" justify="center">
+        <a-form>
+          <a-button-group>
+            <template v-for="(schema, index) of schemaArray">
+              <a-form-item :key="index">
+                <a-button
+                  class="schema-btn"
+                  @click="handleClickSchema(index)"
+                  block
+                >
+                  {{ upperFirst(schema.schemaName) }}
+                </a-button>
+              </a-form-item>
+            </template>
+          </a-button-group>
+        </a-form>
+      </a-row>
+      <a-divider orientation="right">
+        <a-button
+          shape="circle"
+          icon="plus"
+          @click="handleClickAddSchema()"
+        />
+      </a-divider>
     </div>
-    <div v-else>
+    <div v-else-if="isTable">
       <a-row
         type="flex"
         justify="space-between"
       >
         <a-col>
-          <a-button
-            class="schema-btn-special"
-            @click="handleClickBack"
-          >
+          <a-button class="schema-btn-special" @click="handleClickBack">
             Back
           </a-button>
         </a-col>
         <a-col>
-          <a-button
-            class="schema-btn-special"
-            @click="handleClickSave"
-          >
+          <a-button class="schema-btn-special" @click="handleClickSave">
             Save
           </a-button>
         </a-col>
       </a-row>
-      <a-form layout="vertical">
+      <a-form>
         <a-form-item
-          label="schema"
+          label="schema name"
           required
         >
           <a-input
@@ -65,115 +55,32 @@
             @change="handleChangeSchema"
           />
         </a-form-item>
-        <a-form-item
-          label="table"
-          required
-        >
-          <a-input
-            v-model="currentSchema.tableName"
-            @change="handleChangeSchema"
-          />
-        </a-form-item>
-        <a-form-item
-          label="pkey"
-          required
-        >
-          <a-select
-            v-model="currentSchema.pkeyIndex"
-            @change="handleChangeSchema"
-          >
-            <template v-for="(column, index) of currentSchema.columns">
-              <a-select-option
-                v-if="column.type === 'id'"
-                :value="index"
-                :key="index"
-              >
-                {{ column.name }}
-              </a-select-option>
-            </template>
-          </a-select>
-        </a-form-item>
-        <a-divider orientation="left">
-          columns
+        <a-divider>
+          tables
         </a-divider>
-        <a-collapse :active-key="activeKey">
-          <template v-for="(column, index) of currentSchema.columns">
-            <a-collapse-panel :key="`${index}`">
-              <a-row
-                type="flex"
-                justify="space-between"
-                slot="header"
-              >
-                <a-col><span>{{ getColumnHeader(index) }}</span></a-col>
-                <a-col
-                  v-if="index > 0"
-                  style="padding-right:10px;"
-                >
+        <a-row type="flex" justify="center">
+          <a-form>
+            <a-button-group>
+              <template v-for="(table, index) of currentSchema.tables">
+                <a-form-item :key="index">
                   <a-button
-                    type="danger"
-                    size="small"
-                    shape="circle"
-                    icon="minus"
-                    @click.stop="handleClickRemoveColumn(index)"
-                  />
-                </a-col>
-              </a-row>
-              <template v-for="propName of columnPropMap">
-                <a-form-item
-                  :label="propName"
-                  :key="`${index}_${propName}`"
-                  :required="propName === 'name' || propName === 'type'"
-                >
-                  <a-input
-                    v-model="currentSchema.columns[index][propName]"
-                    @change="handleChangeSchema"
-                  />
+                    v-if="table.tableName || currentSchema.schemaName"
+                    class="schema-btn"
+                    @click="handleClickTable(index)"
+                    block
+                  >
+                    {{ upperFirst(table.tableName || currentSchema.schemaName) }}
+                  </a-button>
                 </a-form-item>
               </template>
-              <a-form-item
-                label="default"
-                :key="`${index}_def`"
-                v-if="column.type"
-              >
-                <a-switch
-                  v-if="currentSchema.columns[index].type === 'boolean'"
-                  v-model="currentSchema.columns[index].def"
-                  @change="handleChangeSchema"
-                />
-                <a-input-number
-                  style="width:100%;"
-                  v-else-if="currentSchema.columns[index].type === 'number' || currentSchema.columns[index].type === 'id'"
-                  v-model="currentSchema.columns[index].def"
-                  @change="handleChangeSchema"
-                />
-                <a-date-picker
-                  v-else-if="currentSchema.columns[index].type === 'timestamp'"
-                  v-model="currentSchema.columns[index].def"
-                  @change="handleChangeSchema"
-                />
-                <a-input
-                  v-else
-                  v-model="currentSchema.columns[index].def"
-                  @change="handleChangeSchema"
-                />
-              </a-form-item>
-              <a-form-item
-                label="required"
-                :key="`${index}_required`"
-              >
-                <a-switch
-                  v-model="currentSchema.columns[index].required"
-                  @change="handleChangeSchema"
-                />
-              </a-form-item>
-            </a-collapse-panel>
-          </template>
-        </a-collapse>
+            </a-button-group>
+          </a-form>
+        </a-row>
         <a-divider orientation="right">
           <a-button
             shape="circle"
             icon="plus"
-            @click="handleClickAddColumn"
+            @click="handleClickAddTable"
           />
         </a-divider>
       </a-form>
@@ -184,185 +91,131 @@
 
 <script>
 import { upperFirst } from 'lodash'
+import { Schema } from '../libs/schema'
+import api from '../facades/api'
 
-const columnPropMap = ['name', 'type', 'alias', 'foreign']
-const Column = ({ name = '', type = '', alias = null, foreign = null, def = null, required = false }) => {
-  const column = {
-    name,
-    type,
-    alias,
-    foreign,
-    def,
-    required,
-  }
-  return column
-}
-
-const Schema = ({ schemaName = '', tableName = '', pkeyIndex = 0, columns = [new Column({ name: 'id', type: 'id' })] }) => {
-  const schema = {
-    schemaName,
-    tableName,
-    pkeyIndex,
-    columns,
-  }
-  return schema
-}
+const blankSchema = new Schema({
+  schemaName: '',
+})
 
 export default {
-  name: 'SchemaManager',
   data() {
     return {
-      columnPropMap,
-      isDetail: false,
-      schemas: [],
-      activeKey: [],
+      isSchema: true,
+      isTable: false,
+      isNew: false,
 
-      currentSchemaIndex: false,
-      currentSchema: {
-        schemaName: '',
-        tableName: '',
-        pkeyIndex: 0,
-        columns: [new Column({ name: 'id', type: 'id' })],
+      schemaArray: [blankSchema],
+      currentSchema: blankSchema,
+      location: {
+        schema: 0,
+        table: 0,
       },
     }
   },
-  computed: {
-  },
+  computed: {},
   methods: {
     upperFirst,
 
     handleClickAddSchema() {
-      this.currentSchemaIndex = false
-      this.currentSchema = new Schema({})
-      this.showDetail()
+      this.isNew = true
+      this.currentSchema = blankSchema
+      this.showTables()
     },
 
     handleClickRemoveSchema(index) {
-      this.schemas.splice(index, 1)
-      this.saveSchemas()
+      this.deleteSchema(index)
     },
 
-    handleClickSchema(index) {
-      this.currentSchemaIndex = index
-      this.initialCurrentSchema()
+    handleClickSchema(sindex) {
+      this.isNew = false
+      this.location.schema = sindex
+      this.getSchema(sindex)
+      this.handleClickTable(0)
       this.handleChangeSchema()
-      this.showDetail()
+      this.showTables()
     },
 
     handleChangeSchema() {
-      this.$emit('change', this.generateSchema())
+      this.$store.commit('change-schema', this.currentSchema)
+    },
+
+    handleClickAddTable() {
+    },
+
+    handleClickTable(tindex) {
+      this.location.table = tindex
+      this.$emit('select', this.location)
     },
 
     handleClickBack() {
-      this.getSchemas()
+      this.listSchema()
       this.showSchemas()
+      this.$emit('select', null)
     },
 
     handleClickSave() {
-      this.cleanSchema()
-      console.log(this.currentSchemaIndex)
-      if (!this.currentSchemaIndex && this.currentSchemaIndex !== 0) this.addSchema()
+      if (this.isNew) this.addSchema()
       else this.updateSchema()
     },
 
-    handleClickAddColumn() {
-      const blankColumn = new Column({
-        name: '',
-        type: '',
-      })
-      const index = this.currentSchema.columns.push(blankColumn) - 1
-      this.activeKey = [`${index}`]
-    },
-
-    handleClickRemoveColumn(index) {
-      const { columns } = this.currentSchema
-      columns.splice(index, 1)
-    },
-
     showSchemas() {
-      this.isNew = false
-      this.isDetail = false
+      this.isSchema = true
+      this.isTable = false
     },
-    showDetail() {
-      this.isNew = false
-      this.isDetail = true
-    },
-
-    cleanSchema() {
-      this.currentSchema.columns.forEach((column, index) => {
-        if (!column.name || !column.type) {
-          this.currentSchema.columns.splice(index, 1)
-          this.cleanSchema()
-        }
-      })
+    showTables() {
+      this.isSchema = false
+      this.isTable = true
     },
 
-    getSchemas() {
-      this.schemas = JSON.parse(localStorage.getItem('schemas-data')) || []
-    },
-
-    saveSchemas() {
-      const buffer = JSON.stringify(this.schemas)
-      localStorage.setItem('schemas-data', buffer)
-      this.$message.success('save successfully')
-    },
-
-    addSchema() {
-      if (this.schemas.every(schema => schema.schemaName !== this.currentSchema.schemaName)) {
-        this.schemas.push(this.currentSchema)
-        this.saveSchemas()
-      } else {
-        this.$message.error(`duplicate schema name: ${this.currentSchema.schemaName}`)
-      }
-    },
-    updateSchema() {
-      if (this.schemas.some((schema, index) => schema.schemaName === this.currentSchema.schemaName && index !== this.currentSchemaIndex)) {
-        this.$message.error(`duplicate schema name: ${this.currentSchema.schemaName}`)
-      } else {
-        this.schemas[this.currentSchemaIndex] = this.currentSchema
-        this.saveSchemas()
+    async listSchema() {
+      try {
+        const res = await api.schema.list()
+        this.schemaArray = res
+      } catch (error) {
+        this.$message.error(error.message)
       }
     },
 
-    getColumnHeader(index) {
-      const { name, type } = this.currentSchema.columns[index]
-      if (name || type) return `${name} ${type ? `<${type}>` : ''}`
-      return '...'
-    },
-
-    generateSchema() {
-      const { schemaName, tableName, pkeyIndex, columns } = this.currentSchema
-      const pkey = columns[pkeyIndex].name
-      return {
-        schemaName,
-        tableName,
-        pkey,
-        columns,
+    async getSchema(index) {
+      try {
+        const res = await api.schema.get(index)
+        this.currentSchema = res
+      } catch (error) {
+        this.$message.error(error.message)
       }
     },
 
-    initialCurrentSchema() {
-      this.currentSchema = this.schemas[this.currentSchemaIndex]
-      // let pkeyIndex = 0
-      // const { schemaName, tableName } = model
-      // const columns = model.columns.items.map((column, index) => {
-      //   if ((model.pkey && column.name === model.pkey) || column.type === 'id') pkeyIndex = index
-      //   const { name, type, alias, foreign, def, required } = column
-      //   const newColumn = new Column({ name, type, alias, foreign, def, required })
-      //   return newColumn
-      // })
-      // this.currentSchema = new Schema({
-      //   schemaName,
-      //   tableName,
-      //   pkeyIndex,
-      //   columns,
-      // })
+    async addSchema() {
+      try {
+        const res = await api.schema.add(this.currentSchema)
+        this.location.schema = res
+        this.$message.success(`Add new schema ${this.currentSchema.schemaName}`)
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+    async updateSchema() {
+      try {
+        const res = await api.schema.update(this.location.schema, this.currentSchema)
+        this.location.schema = res
+        this.$message.success(`Update schema ${this.currentSchema.schemaName}`)
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+    async deleteSchema() {
+      try {
+        const res = await api.schema.delete(this.location.schema)
+        this.location.schema = res
+        this.$message.success(`Delete schema ${this.currentSchema.schemaName}`)
+      } catch (error) {
+        this.$message.error(error.message)
+      }
     },
   },
   mounted() {
-    this.getSchemas()
-    console.log(this.schemas)
-    // console.log(this.schemas)
+    this.listSchema()
   },
 }
 </script>
@@ -378,13 +231,11 @@ export default {
   }
   .schema-btn-special {
     margin: 10px 0 20px 0;
-    width: 120px;
     color: whitesmoke;
     background-color: #666;
   }
   .schema-btn {
-    margin: 20px 0;
-    width: 120px;
+    min-width: 120px;
     color: whitesmoke;
     background-color: #666;
   }

@@ -6,9 +6,9 @@
           columns
         </a-divider>
         <a-row type="flex" justify="center">
-          <a-form layout="horizontal">
-            <a-button-group class="column-list-button-group">
-              <template v-for="(column, index) of table.columns">
+          <a-form>
+            <a-button-group>
+              <template v-for="(column, index) of currentTable.columns">
                 <a-form-item :key="index">
                   <a-button
                     class="column-list-button"
@@ -25,9 +25,9 @@
       </a-col>
       <a-col :span="12" class="column-detail">
         <a-divider>
-          {{ generateColumnButtonText(currentIndex) }}
+          {{ generateColumnButtonText(currentColumnIndex) }}
         </a-divider>
-        <TableDetail :column="table.columns[currentIndex]" @change="handleChangeColumn" />
+        <TableDetail :column="currentTable.columns[currentColumnIndex]" @change="handleChangeColumn" />
       </a-col>
     </a-row>
   </div>
@@ -35,63 +35,84 @@
 
 <script>
 import TableDetail from './content-table-detail.vue'
-// import api from '../facades/api'
-// import { Schema, Column } from '../libs/schema'
+import api from '../facades/api'
+import { Table } from '../libs/schema'
 
-
-const fakeTable = {
-  schemaName: 'user',
-  tableName: 'profile',
-  columns: [
-    {
-      columnType: 'number',
-      name: 'id',
-    },
-    {
-      columnType: 'string',
-      name: 'username',
-    },
-  ],
-}
+const blankTable = new Table({
+  schemaName: '',
+  tableName: '',
+})
 
 export default {
   components: {
     TableDetail,
   },
   props: {
-    sindex: {
-      type: Number,
-      default: 0,
-    },
-    tindex: {
-      type: Number,
-      default: 0,
+    locaction: {
+      type: Object,
+      default: () => ({ schema: 0, table: 0 }),
+      schema: {
+        type: Number,
+        default: 0,
+      },
+      table: {
+        type: Number,
+        default: 0,
+      },
     },
   },
   data() {
     return {
-      table: {
-        tableName: '',
-        columns: [],
-      },
-      currentIndex: 0,
+      currentTable: blankTable,
+      currentColumnIndex: 0,
     }
+  },
+  watch: {
+    location: () => {
+      console.log(this.location)
+      this.getTable()
+    },
   },
   methods: {
     generateColumnButtonText(index) {
-      const { name = 'column', columnType = 'type' } = this.table.columns[index]
+      const { name = 'column', columnType = 'type' } = this.currentTable.columns[index]
       if (name || columnType) return `${name} <${columnType}>`
       return '...'
     },
 
-    handleChangeColumn() {},
+    handleChangeColumn(column) {
+      this.currentTable.columns[this.currentColumnIndex] = column
+      this.$emit('change', column)
+    },
+
+    handleClickColumn(index) {
+      this.currentColumnIndex = index
+    },
 
     async getTable() {
       try {
-        // const res = await api.table.get(this.sindex, this.tindex)
-        const res = fakeTable
-        this.table = res
-        console.log(this.table)
+        const res = await api.table.get(this.location)
+        console.log(res)
+        this.currentTable = res
+        console.log(res)
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+    async updateTable() {
+      try {
+        const res = await api.table.update(this.location, this.currentTable)
+        console.log(res)
+        this.$message.success(`Update table ${this.currentTable.tableName}`)
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+    async deleteTable() {
+      try {
+        const res = await api.schema.delete(this.location)
+        console.log(res)
+        this.$message.success(`Delete schema ${this.currentTable.tableName}`)
       } catch (error) {
         this.$message.error(error.message)
       }

@@ -21,10 +21,13 @@ export class Table {
     schemaName,
     tableName,
     pkeyIndex = 0,
-    columns = new Column({
-      type: 'id',
-      name: 'id',
-    }),
+    columns = [
+      new Column({
+        table: tableName,
+        columnType: '',
+        name: '',
+      }),
+    ],
   }) {
     this.schemaName = schemaName
     this.tableName = tableName
@@ -34,7 +37,15 @@ export class Table {
 }
 
 export class Schema {
-  constructor({ schemaName, tables = [] }) {
+  constructor({
+    schemaName,
+    tables = [
+      new Table({
+        schemaName,
+        tableName: '',
+      }),
+    ],
+  }) {
     this.schemaName = schemaName
     this.tables = tables
   }
