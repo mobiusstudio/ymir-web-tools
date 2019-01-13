@@ -3,7 +3,7 @@
     <a-row type="flex" justify="space-between">
       <a-col :span="10" class="column-list">
         <a-divider>
-          columns
+          {{ `"${currentTable.schemaName}".${currentTable.tableName}` }}
         </a-divider>
         <a-row type="flex" justify="center">
           <a-form>
@@ -47,33 +47,11 @@ export default {
   components: {
     TableDetail,
   },
-  props: {
-    location: {
-      type: Object,
-      default: () => ({ schema: 0, table: 0 }),
-      schema: {
-        type: Number,
-        default: 0,
-      },
-      table: {
-        type: Number,
-        default: 0,
-      },
-    },
-  },
   data() {
     return {
       currentTable: blankTable,
       currentColumnIndex: 0,
     }
-  },
-  watch: {
-    location: {
-      handler() {
-        this.getTable()
-      },
-      deep: true,
-    },
   },
   methods: {
     generateColumnButtonText(index) {
@@ -93,23 +71,25 @@ export default {
 
     commitTable() {
       this.$store.commit('change-table', {
-        table: this.currentTable,
+        data: this.currentTable,
       })
     },
 
     async getTable() {
       try {
-        const res = await api.table.get(this.location)
+        const { sid, tid } = this.$store.state.table
+        const res = await api.table.get(sid, tid)
+        console.log(res)
         this.currentTable = res
         this.commitTable()
-        console.log(this.currentTable)
       } catch (error) {
         this.$message.error(error.message)
       }
     },
     async updateTable() {
       try {
-        const res = await api.table.update(this.location, this.currentTable)
+        const { sid, tid } = this.$store.state.table
+        const res = await api.table.update(sid, tid, this.currentTable)
         console.log(res)
         this.$message.success(`Update table ${this.currentTable.tableName}`)
       } catch (error) {
@@ -118,7 +98,8 @@ export default {
     },
     async deleteTable() {
       try {
-        const res = await api.table.delete(this.location)
+        const { sid, tid } = this.$store.state.table
+        const res = await api.table.delete(sid, tid)
         console.log(res)
         this.$message.success(`Delete schema ${this.currentTable.tableName}`)
       } catch (error) {

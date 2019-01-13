@@ -40,41 +40,40 @@
           </a-button>
         </a-col>
         <a-col>
-          <a-button class="schema-btn-special" @click="handleClickSave">
-            Save
+          <a-button class="schema-btn-special" @click="handleClickApply">
+            Apply
           </a-button>
         </a-col>
       </a-row>
       <a-form>
-        <a-form-item
-          label="schema name"
-          required
-        >
-          <a-input
-            v-model="currentSchema.schemaName"
-            @change="handleChangeSchema"
-          />
+        <a-form-item label="schema name" required>
+          <a-input v-model="schemaName" @change="handleChangeSchema">
+            <a-icon
+              v-show="schemaName !== currentSchema.schemaName"
+              slot="suffix"
+              type="check"
+              @click="handleClickCheck"
+            />
+          </a-input>
         </a-form-item>
         <a-divider>
           tables
         </a-divider>
         <a-row type="flex" justify="center">
-          <a-form>
-            <a-button-group>
-              <template v-for="(table, index) of currentSchema.tables">
-                <a-form-item :key="index">
-                  <a-button
-                    v-if="table.tableName || currentSchema.schemaName"
-                    class="schema-btn"
-                    @click="handleClickTable(index)"
-                    block
-                  >
-                    {{ upperFirst(table.tableName || currentSchema.schemaName) }}
-                  </a-button>
-                </a-form-item>
-              </template>
-            </a-button-group>
-          </a-form>
+          <a-button-group>
+            <template v-for="(table, index) of currentSchema.tables">
+              <a-form-item :key="index">
+                <a-button
+                  v-if="table.tableName || currentSchema.schemaName"
+                  class="schema-btn"
+                  @click="handleClickTable(index)"
+                  block
+                >
+                  {{ upperFirst(table.tableName || currentSchema.schemaName) }}
+                </a-button>
+              </a-form-item>
+            </template>
+          </a-button-group>
         </a-row>
         <a-divider orientation="right">
           <a-button
@@ -107,15 +106,17 @@ export default {
 
       schemaArray: [blankSchema],
       currentSchema: blankSchema,
-      location: {
-        schema: 0,
-        table: 0,
-      },
+      schemaName: '',
+      sid: 0,
     }
   },
   computed: {},
   methods: {
     upperFirst,
+
+    handleClickApply() {
+
+    },
 
     handleClickAddSchema() {
       this.isNew = true
@@ -129,15 +130,16 @@ export default {
 
     handleClickSchema(sindex) {
       this.isNew = false
-      this.location.schema = sindex
-      this.getSchema(sindex)
+      this.sid = sindex
+      this.getSchema()
+      console.log(this.currentSchema)
       this.handleClickTable(0)
       this.showTables()
     },
 
     handleChangeSchema() {
       this.$store.commit('change-schema', {
-        schemaName: this.currentSchema.schemaName,
+        schemaName: this.schemaName,
       })
     },
 
@@ -145,8 +147,12 @@ export default {
     },
 
     handleClickTable(tindex) {
-      this.location.table = tindex
-      this.$emit('select', this.location)
+      this.$store.commit('change-table', {
+        sid: this.sid,
+        tid: tindex,
+        data: this.currentSchema.tables[tindex],
+      })
+      this.$emit('select', tindex)
     },
 
     handleClickBack() {
@@ -155,7 +161,8 @@ export default {
       this.$emit('select', null)
     },
 
-    handleClickSave() {
+    handleClickCheck() {
+      this.currentSchema.schemaName = this.schemaName
       if (this.isNew) this.addSchema()
       else this.updateSchema()
     },
@@ -178,10 +185,12 @@ export default {
       }
     },
 
-    async getSchema(index) {
+    async getSchema() {
       try {
-        const res = await api.schema.get(index)
+        const id = this.sid
+        const res = await api.schema.get(id)
         this.currentSchema = res
+        this.schemaName = this.currentSchema.schemaName
       } catch (error) {
         this.$message.error(error.message)
       }
@@ -190,7 +199,7 @@ export default {
     async addSchema() {
       try {
         const res = await api.schema.add(this.currentSchema)
-        this.location.schema = res
+        this.sid = res
         this.$message.success(`Add new schema ${this.currentSchema.schemaName}`)
       } catch (error) {
         this.$message.error(error.message)
@@ -198,8 +207,9 @@ export default {
     },
     async updateSchema() {
       try {
-        const res = await api.schema.update(this.location.schema, this.currentSchema)
-        this.location.schema = res
+        const id = this.sid
+        const res = await api.schema.update(id, this.currentSchema)
+        this.sid = res
         this.$message.success(`Update schema ${this.currentSchema.schemaName}`)
       } catch (error) {
         this.$message.error(error.message)
@@ -207,8 +217,9 @@ export default {
     },
     async deleteSchema() {
       try {
-        const res = await api.schema.delete(this.location.schema)
-        this.location.schema = res
+        const id = this.sid
+        const res = await api.schema.delete(id)
+        this.sid = res
         this.$message.success(`Delete schema ${this.currentSchema.schemaName}`)
       } catch (error) {
         this.$message.error(error.message)

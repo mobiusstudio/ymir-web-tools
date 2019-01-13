@@ -5,7 +5,7 @@
     </div>
     <div class="content-panel">
       <ContentSwagger v-if="isSwagger" />
-      <ContentTable v-if="isSchema" :location="location" />
+      <ContentTable v-if="isSchema" />
     </div>
     <div class="right-panel">
       <CodeView />
@@ -30,26 +30,22 @@ export default {
     return {
       isSwagger: false,
       isSchema: false,
-      location: {
-        schema: 0,
-        table: 0,
-      },
     }
   },
   computed: {
   },
   methods: {
-    handleSelectTable(location) {
-      if (location) {
-        if (!this.isSchema) this.isSchema = true
-        this.location = location
-      } else {
-        this.isSchema = false
-      }
+    handleSelectTable(index) {
+      if (index || index === 0) this.showSchema()
+      else this.hideSchema()
     },
-    handleChangeTable() {
+
+    showSchema() {
+      this.isSwagger = false
+      this.isSchema = true
     },
-    handleChangeSchema() {
+    hideSchema() {
+      this.isSchema = false
     },
   },
   mounted() {

@@ -32,7 +32,11 @@ export class Table {
     this.schemaName = schemaName
     this.tableName = tableName
     this.pkeyIndex = pkeyIndex
-    this.columns = columns
+    this.columns = columns.map((item) => {
+      const newItem = item
+      newItem.table = `"${this.schemaName}".${this.tableName}`
+      return newItem
+    })
   }
 }
 
@@ -47,6 +51,10 @@ export class Schema {
     ],
   }) {
     this.schemaName = schemaName
-    this.tables = tables
+    this.tables = tables.map((item) => {
+      const newItem = item
+      newItem.schemaName = this.schemaName
+      return newItem
+    })
   }
 }

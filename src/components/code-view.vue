@@ -66,15 +66,15 @@ export default {
       })
     },
     generateCode(view) {
-      const { table } = this.$store.state
-      if (!table) return ''
+      const { data } = this.$store.state.table
+      if (!data) return ''
       switch (view) {
         case 'sql':
-          return generateSql(table)
+          return generateSql(data)
         case 'model':
-          return generateModel(table)
+          return generateModel(data)
         case 'controller':
-          return generateController(table)
+          return generateController(data)
         default: return ''
       }
     },
