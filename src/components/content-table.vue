@@ -8,9 +8,6 @@
         <a-row type="flex" justify="center">
           <a-form>
             <a-button-group>
-              <a-button @click="test">
-                test
-              </a-button>
               <template v-for="(column, index) of currentTable.columns">
                 <a-form-item :key="index">
                   <a-button
@@ -79,10 +76,6 @@ export default {
     },
   },
   methods: {
-    test() {
-      console.log(this.location.schema, this.location.table)
-    },
-
     generateColumnButtonText(index) {
       const { name = 'column', type = 'type' } = this.currentTable.columns[index]
       if (name || type) return `${name} <${type}>`

@@ -1,56 +1,45 @@
 <template>
   <div class="content-table-detail">
     <a-form layout="horizontal">
-      <a-form-item
-        :label-col="labelCol"
-        :wrapper-col="wrapperCol"
-        label="type"
-        required
-      >
-        <a-input
-          v-model="currentColumn.columnType"
-          @change="handleChangeColumn"
-        />
-      </a-form-item>
       <template v-for="key of columnKeyMap">
         <a-form-item
           :label-col="labelCol"
           :wrapper-col="wrapperCol"
           :label="key"
           :key="key"
-          :required="key === 'name'"
+          :required="key === 'type' || key === 'name'"
         >
           <a-input
-            v-model="currentColumn[key]"
+            v-model="column[key]"
             @change="handleChangeColumn"
           />
         </a-form-item>
       </template>
       <a-form-item
-        v-if="currentColumn.type"
+        v-if="column.type"
         :label-col="labelCol"
         :wrapper-col="wrapperCol"
         label="default"
       >
         <a-switch
-          v-if="currentColumn.type === 'boolean'"
-          v-model="currentColumn.def"
+          v-if="column.type === 'boolean'"
+          v-model="column.def"
           @change="handleChangeColumn"
         />
         <a-input-number
-          v-else-if="currentColumn.type === 'number'"
-          v-model="currentColumn.def"
+          v-else-if="column.type === 'number'"
+          v-model="column.def"
           @change="handleChangeColumn"
           style="width:100%;"
         />
         <a-date-picker
-          v-else-if="currentColumn.type === 'timestamp'"
-          v-model="currentColumn.def"
+          v-else-if="column.type === 'timestamp'"
+          v-model="column.def"
           @change="handleChangeColumn"
         />
         <a-input
           v-else
-          v-model="currentColumn.def"
+          v-model="column.def"
           @change="handleChangeColumn"
         />
       </a-form-item>
@@ -60,7 +49,7 @@
         label="required"
       >
         <a-switch
-          v-model="currentColumn.required"
+          v-model="column.required"
           @change="handleChangeColumn"
         />
       </a-form-item>
@@ -80,26 +69,10 @@ export default {
   props: {
     column: {
       type: Object,
-      default: () => ({ type: '', name: '' }),
-
-      columnType: {
-        type: String,
-      },
-      name: {
-        type: String,
-      },
-      alias: {
-        type: String,
-      },
-      foreign: {
-        type: String,
-      },
-      def: {
-        type: [String, Number, Boolean],
-      },
-      required: {
-        type: Boolean,
-      },
+      default: new Column({
+        type: '',
+        name: '',
+      }),
     },
   },
   data() {
@@ -107,12 +80,11 @@ export default {
       columnKeyMap,
       labelCol,
       wrapperCol,
-      currentColumn: this.column,
     }
   },
   methods: {
     handleChangeColumn() {
-      this.$emit('change', this.currentColumn)
+      this.$emit('change', this.column)
     },
   },
   mounted() {
