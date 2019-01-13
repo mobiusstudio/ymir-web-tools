@@ -35,7 +35,7 @@ const generateContent = (type, modelName) => {
       const code =
 `   ${dataCode}
     global.logger.trace('${upperFirst(type)} ${modelName}', id)
-    const result = await new Task().from().where\`id = \${id}\`.select().do()
+    const result = await new ${upperFirst(modelName)}().from().where\`id = \${id}\`.select().do()
     ${returnCode}`
       return code
     }
