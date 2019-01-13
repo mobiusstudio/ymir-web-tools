@@ -132,12 +132,13 @@ export default {
       this.location.schema = sindex
       this.getSchema(sindex)
       this.handleClickTable(0)
-      this.handleChangeSchema()
       this.showTables()
     },
 
     handleChangeSchema() {
-      this.$emit('change', this.currentSchema)
+      this.$store.commit('change-schema', {
+        schemaName: this.currentSchema.schemaName,
+      })
     },
 
     handleClickAddTable() {

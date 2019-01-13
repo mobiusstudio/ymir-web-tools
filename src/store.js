@@ -14,6 +14,9 @@ export default new Vuex.Store({
     'change-table': (state, payload) => {
       state.table = payload.table
     },
+    'change-schema': (state, payload) => {
+      state.table.schemaName = payload.schemaName
+    },
   },
   actions: {
   },
