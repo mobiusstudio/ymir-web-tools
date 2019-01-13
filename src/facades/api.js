@@ -21,11 +21,11 @@ api.schema = {
   add: async (schema) => {
     const schemaArray = getSchemaArray()
     if (schemaArray.every(item => item.schemaName !== schema.schemaName)) {
-      schemaArray.push(schema)
+      const length = schemaArray.push(schema)
       setSchemaArray(schemaArray)
-    } else {
-      throw new Error(`Duplicate schema name ${schema.schemaName}`)
+      return length - 1
     }
+    throw new Error(`Duplicate schema name ${schema.schemaName}`)
   },
   update: async (index, schema) => {
     const schemaArray = getSchemaArray()
@@ -34,12 +34,14 @@ api.schema = {
     } else {
       schemaArray[index] = schema
       setSchemaArray(schemaArray)
+      return index
     }
   },
   delete: async (index) => {
     const schemaArray = getSchemaArray()
     schemaArray.splice(index, 1)
     setSchemaArray(schemaArray)
+    return index
   },
 }
 
@@ -66,11 +68,11 @@ api.table = {
   add: async (sindex, table) => {
     const tableArray = getTableArray(sindex)
     if (tableArray.every(item => item.tableName !== table.tableName)) {
-      tableArray.push(table)
+      const length = tableArray.push(table)
       setTableArray(sindex, tableArray)
-    } else {
-      throw new Error(`Duplicate table name ${table.tableName}`)
+      return length - 1
     }
+    throw new Error(`Duplicate table name ${table.tableName}`)
   },
   update: async (sindex, tindex, table) => {
     const tableArray = getTableArray(sindex)
@@ -79,12 +81,14 @@ api.table = {
     } else {
       tableArray[tindex] = table
       setTableArray(sindex, tableArray)
+      return tindex
     }
   },
   delete: async (sindex, tindex) => {
     const tableArray = getTableArray(sindex)
     tableArray.splice(tindex, 1)
     setTableArray(sindex, tableArray)
+    return tindex
   },
 }
 
