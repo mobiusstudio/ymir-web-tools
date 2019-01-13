@@ -160,7 +160,7 @@ export default {
 
     setTempName() {
       this.tempSchemaName = this.currentSchema.schemaName
-      this.tempTableName = this.currentSchema.tableArray[0].tableName
+      this.tempTableName = this.currentSchema.tableArray[this.currentTableIndex].tableName
     },
 
     handleAddSchema() {
@@ -168,6 +168,7 @@ export default {
       this.currentSchema = new Schema({
         schemaName: '',
       })
+      this.currentTableIndex = 0
       this.setTempName()
       this.showTables()
     },
@@ -228,14 +229,15 @@ export default {
     handleSelectTable(tindex) {
       this.isNewTable = false
       this.currentTableIndex = tindex
+      this.setTempName()
       this.commitTable({
         id: tindex,
       })
-      this.tempSchemaName = this.currentSchema.tableArray[tindex].tableName
       this.$emit('select', tindex)
     },
 
     handleCheckTable() {
+      this.setTempName()
       this.updateSchema()
     },
 
