@@ -5,11 +5,6 @@ module.exports = {
     node: true,
   },
 
-  extends: [
-    'plugin:vue/strongly-recommended',
-    '@vue/airbnb',
-  ],
-
   rules: {
     indent: [
       'error',
@@ -36,7 +31,9 @@ module.exports = {
     'object-curly-newline': [
       'off'
     ],
-    'vue/max-attributes-per-line': 'off'
+    'vue/max-attributes-per-line': 'off',
+    'vue/no-unused-components': 'warning',
+    'vue/no-unused-vars': 'warning'
   },
 
   parserOptions: {
@@ -46,5 +43,5 @@ module.exports = {
   'extends': [
     'plugin:vue/strongly-recommended',
     '@vue/airbnb'
-  ]
+  ],
 }
