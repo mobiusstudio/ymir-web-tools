@@ -21,7 +21,7 @@ export class Table {
     schemaName,
     tableName,
     pkeyIndex = 0,
-    columns = [
+    columnArray = [
       new Column({
         table: tableName,
         columnType: '',
@@ -32,7 +32,7 @@ export class Table {
     this.schemaName = schemaName
     this.tableName = tableName
     this.pkeyIndex = pkeyIndex
-    this.columns = columns.map((item) => {
+    this.columnArray = columnArray.map((item) => {
       const newItem = item
       newItem.table = `"${this.schemaName}".${this.tableName}`
       return newItem
@@ -43,7 +43,7 @@ export class Table {
 export class Schema {
   constructor({
     schemaName,
-    tables = [
+    tableArray = [
       new Table({
         schemaName,
         tableName: '',
@@ -51,7 +51,7 @@ export class Schema {
     ],
   }) {
     this.schemaName = schemaName
-    this.tables = tables.map((item) => {
+    this.tableArray = tableArray.map((item) => {
       const newItem = item
       newItem.schemaName = this.schemaName
       return newItem

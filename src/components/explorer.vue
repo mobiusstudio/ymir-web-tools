@@ -2,30 +2,40 @@
   <div class="schema-manager">
     <div v-if="isSchema">
       <a-divider>
-        schema list
+        schema
       </a-divider>
       <a-row type="flex" justify="center">
         <a-form>
           <a-button-group>
             <template v-for="(schema, index) of schemaArray">
               <a-form-item :key="index">
-                <a-button
-                  class="schema-btn"
-                  @click="handleClickSchema(index)"
-                  block
+                <a-tooltip
+                  placement="right"
+                  :mouse-enter-delay="1"
                 >
-                  {{ upperFirst(schema.schemaName) }}
-                </a-button>
+                  <a-button
+                    class="schema-btn"
+                    @click="handleSelectSchema(index)"
+                    block
+                  >
+                    {{ upperFirst(schema.schemaName) }}
+                  </a-button>
+                  <a-icon
+                    slot="title"
+                    type="delete"
+                    @click="handleRemoveSchema(index)"
+                  />
+                </a-tooltip>
               </a-form-item>
             </template>
           </a-button-group>
         </a-form>
       </a-row>
-      <a-divider orientation="right">
+      <a-divider>
         <a-button
           shape="circle"
           icon="plus"
-          @click="handleClickAddSchema()"
+          @click="handleAddSchema()"
         />
       </a-divider>
     </div>
@@ -35,24 +45,37 @@
         justify="space-between"
       >
         <a-col>
-          <a-button class="schema-btn-special" @click="handleClickBack">
+          <a-button class="schema-btn-special" @click="handleClickBack()">
             Back
           </a-button>
         </a-col>
         <a-col>
-          <a-button class="schema-btn-special" @click="handleClickApply">
+          <a-button class="schema-btn-special" @click="handleClickApply()">
             Apply
           </a-button>
         </a-col>
       </a-row>
       <a-form>
         <a-form-item label="schema name" required>
-          <a-input v-model="schemaName" @change="handleChangeSchema">
+          <a-input v-model="currentSchema.schemaName" @change="handleChangeSchema()">
             <a-icon
-              v-show="schemaName !== currentSchema.schemaName"
+              v-show="tempSchemaName !== currentSchema.schemaName"
               slot="suffix"
               type="check"
-              @click="handleClickCheck"
+              @click="handleCheckSchema()"
+            />
+          </a-input>
+        </a-form-item>
+        <a-form-item label="table name" required>
+          <a-input
+            v-model="currentSchema.tableArray[currentTableIndex].tableName"
+            @change="handleChangeTable()"
+          >
+            <a-icon
+              v-show="tempTableName !== currentSchema.tableArray[currentTableIndex].tableName"
+              slot="suffix"
+              type="check"
+              @click="handleCheckTable()"
             />
           </a-input>
         </a-form-item>
@@ -61,15 +84,15 @@
         </a-divider>
         <a-row type="flex" justify="center">
           <a-button-group>
-            <template v-for="(table, index) of currentSchema.tables">
+            <template v-for="(table, index) of currentSchema.tableArray">
               <a-form-item :key="index">
                 <a-button
                   v-if="table.tableName || currentSchema.schemaName"
                   class="schema-btn"
-                  @click="handleClickTable(index)"
+                  @click="handleSelectTable(index)"
                   block
                 >
-                  {{ upperFirst(table.tableName || currentSchema.schemaName) }}
+                  {{ upperFirst(table.tableName) || '...' }}
                 </a-button>
               </a-form-item>
             </template>
@@ -79,7 +102,7 @@
           <a-button
             shape="circle"
             icon="plus"
-            @click="handleClickAddTable"
+            @click="handleAddTable()"
           />
         </a-divider>
       </a-form>
@@ -90,70 +113,31 @@
 
 <script>
 import { upperFirst } from 'lodash'
-import { Schema } from '../libs/schema'
+import { Schema, Table } from '../libs/schema'
 import api from '../facades/api'
-
-const blankSchema = new Schema({
-  schemaName: '',
-})
 
 export default {
   data() {
     return {
       isSchema: true,
       isTable: false,
-      isNew: false,
+      isNewSchema: false,
+      isNewTable: false,
 
-      schemaArray: [blankSchema],
-      currentSchema: blankSchema,
-      schemaName: '',
-      sid: 0,
+      schemaArray: [new Schema({
+        schemaName: '',
+      })],
+      currentSchema: new Schema({
+        schemaName: '',
+      }),
+      currentTableIndex: 0,
+      tempSchemaName: '',
+      tempTableName: '',
     }
   },
   computed: {},
   methods: {
     upperFirst,
-
-    handleClickApply() {
-
-    },
-
-    handleClickAddSchema() {
-      this.isNew = true
-      this.currentSchema = blankSchema
-      this.showTables()
-    },
-
-    handleClickRemoveSchema(index) {
-      this.deleteSchema(index)
-    },
-
-    handleClickSchema(sindex) {
-      this.isNew = false
-      this.sid = sindex
-      this.getSchema()
-      console.log(this.currentSchema)
-      this.handleClickTable(0)
-      this.showTables()
-    },
-
-    handleChangeSchema() {
-      this.$store.commit('change-schema', {
-        schemaName: this.schemaName,
-      })
-    },
-
-    handleClickAddTable() {
-    },
-
-    handleClickTable(tindex) {
-      this.$store.commit('change-table', {
-        sid: this.sid,
-        tid: tindex,
-        data: this.currentSchema.tables[tindex],
-      })
-      this.$emit('select', tindex)
-    },
 
     handleClickBack() {
       this.listSchema()
@@ -161,25 +145,110 @@ export default {
       this.$emit('select', null)
     },
 
-    handleClickCheck() {
-      this.currentSchema.schemaName = this.schemaName
-      if (this.isNew) this.addSchema()
-      else this.updateSchema()
+    handleClickApply() {
     },
 
+    // schema
     showSchemas() {
       this.isSchema = true
       this.isTable = false
     },
+
+    commitSchema(payload) {
+      this.$store.commit('change-schema', payload)
+    },
+
+    setTempName() {
+      this.tempSchemaName = this.currentSchema.schemaName
+      this.tempTableName = this.currentSchema.tableArray[0].tableName
+    },
+
+    handleAddSchema() {
+      this.isNewSchema = true
+      this.currentSchema = new Schema({
+        schemaName: '',
+      })
+      this.setTempName()
+      this.showTables()
+    },
+
+    handleRemoveSchema(index) {
+      this.deleteSchema(index)
+    },
+
+    handleSelectSchema(sindex) {
+      this.isNewSchema = false
+      this.commitSchema({
+        id: sindex,
+      })
+      this.getSchema()
+      this.handleSelectTable(0)
+      this.showTables()
+    },
+
+    handleCheckSchema() {
+      this.setTempName()
+      if (this.isNewSchema) this.addSchema()
+      else this.updateSchema()
+    },
+
+    handleChangeSchema() {
+      if (this.isNewSchema) this.currentSchema.tableArray[0].tableName = this.currentSchema.schemaName
+      this.commitSchema({
+        data: this.currentSchema,
+      })
+    },
+
+
+    // table
     showTables() {
       this.isSchema = false
       this.isTable = true
     },
 
+    commitTable(payload) {
+      this.$store.commit('change-table', payload)
+    },
+
+    handleAddTable() {
+      this.isNewTable = true
+      const table = new Table({
+        schemaName: '',
+        tableName: '',
+      })
+      const length = this.currentSchema.tableArray.push(table)
+      this.currentTableIndex = length - 1
+    },
+
+    handleRemoveTable(index) {
+      this.currentSchema.tableArray.splice(index, 1)
+      this.updateSchema()
+    },
+
+    handleSelectTable(tindex) {
+      this.isNewTable = false
+      this.currentTableIndex = tindex
+      this.commitTable({
+        id: tindex,
+      })
+      this.tempSchemaName = this.currentSchema.tableArray[tindex].tableName
+      this.$emit('select', tindex)
+    },
+
+    handleCheckTable() {
+      this.updateSchema()
+    },
+
+    handleChangeTable() {
+      this.commitSchema({
+        data: this.currentSchema,
+      })
+    },
+
     async listSchema() {
       try {
         const res = await api.schema.list()
-        this.schemaArray = res
+        this.schemaArray = res.data
       } catch (error) {
         this.$message.error(error.message)
       }
@@ -187,10 +256,14 @@ export default {
 
     async getSchema() {
       try {
-        const id = this.sid
+        const id = this.$store.state.schema.sid
         const res = await api.schema.get(id)
-        this.currentSchema = res
-        this.schemaName = this.currentSchema.schemaName
+        this.currentSchema = res.data
+        this.tempSchemaName = this.currentSchema.schemaName
+        this.tempTableName = this.currentSchema.tableArray[0].tableName
+        this.commitSchema({
+          data: this.currentSchema,
+        })
       } catch (error) {
         this.$message.error(error.message)
       }
@@ -199,7 +272,13 @@ export default {
     async addSchema() {
       try {
         const res = await api.schema.add(this.currentSchema)
-        this.sid = res
+        this.commitSchema({
+          id: res.id,
+          data: this.currentSchema,
+        })
+        this.commitTable({
+          id: 0,
+        })
         this.$message.success(`Add new schema ${this.currentSchema.schemaName}`)
       } catch (error) {
         this.$message.error(error.message)
@@ -207,20 +286,23 @@ export default {
     },
     async updateSchema() {
       try {
-        const id = this.sid
-        const res = await api.schema.update(id, this.currentSchema)
-        this.sid = res
+        const id = this.$store.state.schema.sid
+        await api.schema.update(id, this.currentSchema)
+        this.commitSchema({
+          data: this.currentSchema,
+        })
         this.$message.success(`Update schema ${this.currentSchema.schemaName}`)
       } catch (error) {
         this.$message.error(error.message)
       }
     },
-    async deleteSchema() {
+
+    async deleteSchema(index) {
       try {
-        const id = this.sid
-        const res = await api.schema.delete(id)
-        this.sid = res
+        const id = index
+        await api.schema.delete(id)
         this.$message.success(`Delete schema ${this.currentSchema.schemaName}`)
+        this.listSchema()
       } catch (error) {
         this.$message.error(error.message)
       }

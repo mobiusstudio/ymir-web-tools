@@ -3,10 +3,10 @@ import { Schema, Table, Column } from '../libs/schema'
 export const fakeSchemaArray = [
   new Schema({
     schemaName: 'user',
-    tables: [
+    tableArray: [
       new Table({
         tableName: 'account',
-        columns: [
+        columnArray: [
           new Column({
             type: 'number',
             name: 'id',
@@ -23,7 +23,7 @@ export const fakeSchemaArray = [
       }),
       new Table({
         tableName: 'profile',
-        columns: [
+        columnArray: [
           new Column({
             type: 'number',
             name: 'id',

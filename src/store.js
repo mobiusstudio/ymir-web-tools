@@ -6,22 +6,21 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    table: {
+    schema: {
       sid: 0,
       tid: 0,
-      data: null,
+      data: undefined,
     },
   },
   getters: {
   },
   mutations: {
     'change-table': (state, payload) => {
-      if (payload.sid || payload.sid === 0) state.table.sid = payload.sid
-      if (payload.tid || payload.sid === 0) state.table.tid = payload.tid
-      if (payload.data) state.table.data = payload.data
+      if (payload.id || payload.id === 0) state.schema.tid = payload.id
     },
     'change-schema': (state, payload) => {
-      if (payload.schemaName) state.table.data.schemaName = payload.schemaName
+      if (payload.id || payload.id === 0) state.schema.sid = payload.id
+      if (payload.data) state.schema.data = payload.data
     },
   },
   actions: {

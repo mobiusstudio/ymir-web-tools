@@ -18,36 +18,40 @@ const setSchemaArray = (schemaArray) => {
 api.schema = {
   list: async () => {
     const schemaArray = getSchemaArray()
-    return schemaArray
+    return {
+      data: schemaArray,
+    }
   },
   get: async (id) => {
     const schemaArray = getSchemaArray()
-    return schemaArray[id]
+    return {
+      data: schemaArray[id],
+    }
   },
   add: async (schema) => {
     const schemaArray = getSchemaArray()
-    if (schemaArray.every(item => item.schemaName !== schema.schemaName)) {
+    if (schemaArray.every(item => item.schemaName.toLowerCase() !== schema.schemaName.toLowerCase())) {
       const length = schemaArray.push(schema)
       setSchemaArray(schemaArray)
-      return length - 1
+      return {
+        id: length - 1,
+      }
     }
     throw new Error(`Duplicate schema name ${schema.schemaName}`)
   },
   update: async (id, schema) => {
     const schemaArray = getSchemaArray()
-    if (schemaArray.some((item, i) => item.schemaName === schema.schemaName && i !== id)) {
+    if (schemaArray.some((item, i) => item.schemaName.toLowerCase() === schema.schemaName.toLowerCase() && i !== id)) {
       throw new Error(`Duplicate schema name ${schema.schemaName}`)
     } else {
       schemaArray[id] = schema
       setSchemaArray(schemaArray)
-      return id
     }
   },
   delete: async (id) => {
     const schemaArray = getSchemaArray()
     schemaArray.splice(id, 1)
     setSchemaArray(schemaArray)
-    return id
   },
 }
 
@@ -70,42 +74,40 @@ const setTableArray = (sid, tableArray) => {
 api.table = {
   list: async (sid) => {
     const tableArray = getTableArray(sid)
-    return tableArray
+    return {
+      data: tableArray,
+    }
   },
   get: (sid, tid) => {
     const tableArray = getTableArray(sid)
-    return tableArray[tid]
+    return {
+      data: tableArray[tid],
+    }
   },
   add: async (sid, table) => {
     const tableArray = getTableArray(sid)
-    if (tableArray.every(item => item.tableName !== table.tableName)) {
+    if (tableArray.every(item => item.tableName.toLowerCase() !== table.tableName.toLowerCase())) {
       const length = tableArray.push(table)
       setTableArray(sid, tableArray)
-      return length - 1
+      return {
+        id: length - 1,
+      }
     }
     throw new Error(`Duplicate table name ${table.tableName}`)
   },
   update: async (sid, tid, table) => {
     const tableArray = getTableArray(sid)
-    if (tableArray.some((item, id) => item.tableName === table.tableName && id !== tid)) {
+    if (tableArray.some((item, id) => item.tableName.toLowerCase() === table.tableName.toLowerCase() && id !== tid)) {
       throw new Error(`Duplicate table name ${table.tableName}`)
     } else {
       tableArray[tid] = table
       setTableArray(sid, tableArray)
-      return {
-        sid,
-        tid,
-      }
     }
   },
   delete: async (sid, tid) => {
     const tableArray = getTableArray(sid)
     tableArray.splice(tid, 1)
     setTableArray(sid, tableArray)
-    return {
-      sid,
-      tid,
-    }
   },
 }
 
