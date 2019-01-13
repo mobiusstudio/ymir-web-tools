@@ -1,7 +1,13 @@
+import { Schema, Table } from '../libs/schema'
+
 const api = {}
 
+const blankSchema = new Schema({
+  schemaName: '',
+})
+
 const getSchemaArray = () => {
-  const schemaArray = JSON.parse(localStorage.getItem('schemas-data')) || []
+  const schemaArray = JSON.parse(localStorage.getItem('schemas-data')) || [blankSchema]
   return schemaArray
 }
 const setSchemaArray = (schemaArray) => {
@@ -45,9 +51,14 @@ api.schema = {
   },
 }
 
+const blankTable = new Table({
+  schemaName: '',
+  tableName: '',
+})
+
 const getTableArray = (sindex) => {
   const schemaArray = getSchemaArray()
-  const tableArray = schemaArray[sindex].tables || []
+  const tableArray = schemaArray[sindex].tables || [blankTable]
   return tableArray
 }
 const setTableArray = (sindex, tableArray) => {
@@ -57,38 +68,38 @@ const setTableArray = (sindex, tableArray) => {
 }
 
 api.table = {
-  list: async (sindex) => {
-    const tableArray = getTableArray(sindex)
+  list: async (location) => {
+    const tableArray = getTableArray(location.schema)
     return tableArray
   },
-  get: async (sindex, tindex) => {
-    const tableArray = getTableArray(sindex)
-    return tableArray[tindex]
+  get: async (location) => {
+    const tableArray = getTableArray(location.schema)
+    return tableArray[location.table]
   },
-  add: async (sindex, table) => {
-    const tableArray = getTableArray(sindex)
+  add: async (location, table) => {
+    const tableArray = getTableArray(location.schema)
     if (tableArray.every(item => item.tableName !== table.tableName)) {
       const length = tableArray.push(table)
-      setTableArray(sindex, tableArray)
+      setTableArray(location.schema, tableArray)
       return length - 1
     }
     throw new Error(`Duplicate table name ${table.tableName}`)
   },
-  update: async (sindex, tindex, table) => {
-    const tableArray = getTableArray(sindex)
-    if (tableArray.some((item, index) => item.tableName === table.tableName && index !== tindex)) {
+  update: async (location, table) => {
+    const tableArray = getTableArray(location.schema)
+    if (tableArray.some((item, index) => item.tableName === table.tableName && index !== location.table)) {
       throw new Error(`Duplicate table name ${table.tableName}`)
     } else {
-      tableArray[tindex] = table
-      setTableArray(sindex, tableArray)
-      return tindex
+      tableArray[location.table] = table
+      setTableArray(location.schema, tableArray)
+      return location
     }
   },
-  delete: async (sindex, tindex) => {
-    const tableArray = getTableArray(sindex)
-    tableArray.splice(tindex, 1)
-    setTableArray(sindex, tableArray)
-    return tindex
+  delete: async (location) => {
+    const tableArray = getTableArray(location.schema)
+    tableArray.splice(location.table, 1)
+    setTableArray(location.schema, tableArray)
+    return location
   },
 }
 
