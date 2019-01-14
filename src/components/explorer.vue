@@ -194,6 +194,7 @@ export default {
     },
 
     handleChangeSchema() {
+      this.currentSchema.setSchemaName()
       if (this.isNewSchema) this.currentSchema.tables[0].setTableName(this.currentSchema.schemaName)
       this.commitSchema({
         data: this.currentSchema,
@@ -242,6 +243,7 @@ export default {
     },
 
     handleChangeTable() {
+      this.currentSchema.tables[this.currentTableIndex].setTableName()
       this.commitSchema({
         data: this.currentSchema,
       })

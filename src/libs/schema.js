@@ -31,8 +31,8 @@ export class Table {
     columns = [
       new Column({
         tableName,
-        type: '',
-        name: '',
+        type: 'number',
+        name: 'id',
       }),
     ],
   }) {
@@ -63,16 +63,18 @@ export class Table {
   }
 
   setSchemaName(schemaName) {
-    this.schemaName = schemaName
+    const name = schemaName || this.schemaName
+    this.schemaName = name
     this.columns.forEach((column) => {
-      column.schemaName = schemaName
+      column.schemaName = name
     })
   }
 
   setTableName(tableName) {
-    this.tableName = tableName
+    const name = tableName || this.tableName
+    this.tableName = name
     this.columns.forEach((column) => {
-      column.tableName = tableName
+      column.tableName = name
     })
   }
 }
@@ -105,9 +107,10 @@ export class Schema {
   }
 
   setSchemaName(schemaName) {
-    this.schemaName = schemaName
+    const name = schemaName || this.schemaName
+    this.schemaName = name
     this.tables.forEach((table) => {
-      table.setSchemaName(schemaName)
+      table.setSchemaName(name)
     })
   }
 }
