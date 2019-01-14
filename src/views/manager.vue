@@ -13,7 +13,7 @@
     <div class="content-panel">
       <!-- <ContentSwagger v-if="isSwagger" /> -->
       <ContentTable
-        v-if="isSchema"
+        v-if="isTable"
         :table="table"
       />
     </div>
@@ -40,7 +40,7 @@ export default {
   data() {
     return {
       isSwagger: false,
-      isSchema: false,
+      isTable: false,
       schemaList: [],
     }
   },
@@ -54,23 +54,28 @@ export default {
     },
   },
   methods: {
-    // schema
-    showSchema() {
+    showTable() {
       this.isSwagger = false
-      this.isSchema = true
+      this.isTable = true
     },
-    hideSchema() {
+    hideTable() {
       this.isSchema = false
     },
 
+    // schema
     commitSchema(payload) {
       this.$store.commit('change-schema', payload)
     },
 
     handleSelectSchema(index) {
-      this.getSchema(index)
-      this.showSchema()
-      this.handleSelectTable(0)
+      if (index === null || index === undefined) {
+        this.hideTable()
+        this.listSchema()
+      } else {
+        this.getSchema(index)
+        this.handleSelectTable(0)
+        this.showTable()
+      }
     },
     handleSaveSchema(payload) {
       const { isNew, data } = payload
@@ -146,14 +151,9 @@ export default {
     },
 
     handleSelectTable(index) {
-      if (!index && index !== 0) {
-        this.hideSchema()
-        this.listSchema()
-      } else {
-        this.commitTable({
-          id: index,
-        })
-      }
+      this.commitTable({
+        id: index,
+      })
     },
 
   },

@@ -39,7 +39,7 @@
               v-show="tempSchemaName && tempSchemaName !== schema.schemaName"
               slot="suffix"
               type="check"
-              @click="handleSaveSchema"
+              @mousedown="handleSaveSchema"
             />
           </a-input>
         </a-form-item>
@@ -55,7 +55,7 @@
               v-show="tempTableName && tempTableName !== schema.tables[tid].tableName"
               slot="suffix"
               type="check"
-              @click="handleSaveTable"
+              @mousedown="handleSaveTable"
             />
           </a-input>
         </a-form-item>
@@ -132,7 +132,7 @@ export default {
 
     handleClickBack() {
       this.showSchemas()
-      this.$emit('select', null)
+      this.selectSchema(null)
     },
 
     handleClickApply() {
