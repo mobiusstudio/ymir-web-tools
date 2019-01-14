@@ -4,11 +4,11 @@
       <Explorer @select="handleSelectTable" />
     </div>
     <div class="content-panel">
-      <ContentSwagger v-if="isSwagger" />
-      <ContentTable v-if="isSchema" />
+      <!-- <ContentSwagger v-if="isSwagger" /> -->
+      <ContentTable v-if="isSchema" :table="table" />
     </div>
     <div class="right-panel">
-      <CodeView />
+      <!-- <CodeView /> -->
     </div>
   </div>
 </template>
@@ -33,6 +33,11 @@ export default {
     }
   },
   computed: {
+    table() {
+      const { tid, data } = this.$store.state.schema
+      const table = data.tables[tid]
+      return table
+    },
   },
   methods: {
     handleSelectTable(index) {

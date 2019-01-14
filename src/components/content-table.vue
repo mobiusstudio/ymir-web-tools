@@ -3,12 +3,12 @@
     <a-row type="flex" justify="space-between">
       <a-col :span="10" class="column-list">
         <a-divider>
-          {{ `"${currentTable.schemaName}".${currentTable.tableName}` }}
+          {{ columnListTitle }}
         </a-divider>
         <a-row type="flex" justify="center">
           <a-form>
             <a-button-group>
-              <template v-for="(column, index) of currentTable.columns">
+              <template v-for="(column, index) of table.columns">
                 <a-form-item :key="index">
                   <a-button
                     class="column-list-button"
@@ -27,7 +27,7 @@
         <a-divider>
           {{ generateColumnButtonText(currentColumnIndex) }}
         </a-divider>
-        <TableDetail :column="currentTable.columns[currentColumnIndex]" @change="handleChangeColumn" />
+        <TableDetail :column="table.columns[currentColumnIndex]" @change="handleChangeColumn" />
       </a-col>
     </a-row>
   </div>
@@ -36,26 +36,30 @@
 <script>
 import TableDetail from './content-table-detail.vue'
 import api from '../facades/api'
-import { Table } from '../libs/schema'
-
-const blankTable = new Table({
-  schemaName: '',
-  tableName: '',
-})
 
 export default {
   components: {
     TableDetail,
   },
+  props: {
+    table: {
+      type: Object,
+      required: true,
+    },
+  },
   data() {
     return {
-      currentTable: blankTable,
       currentColumnIndex: 0,
     }
   },
+  computed: {
+    columnListTitle() {
+      return `"${this.table.schemaName}".${this.table.tableName}`
+    },
+  },
   methods: {
     generateColumnButtonText(index) {
-      const { name = 'column', type = 'type' } = this.currentTable.columns[index]
+      const { name = 'column', type = 'type' } = this.table.columns[index]
       if (name || type) return `${name} <${type}>`
       return '...'
     },
@@ -65,33 +69,32 @@ export default {
     },
 
     handleChangeColumn(column) {
-      this.currentTable.columns[this.currentColumnIndex] = column
+      this.table.columns[this.currentColumnIndex] = column
       this.commitTable()
     },
 
-    commitTable() {
-      this.$store.commit('change-table', {
-        data: this.currentTable,
-      })
+    commitTable(payload) {
+      this.$store.commit('change-table', payload)
+    },
+    commitSchema(payload) {
+      this.$store.commit('change-schema', payload)
     },
 
-    async getTable() {
-      try {
-        const { sid, tid } = this.$store.state.table
-        const res = await api.table.get(sid, tid)
-        console.log(res)
-        this.currentTable = res
-        this.commitTable()
-      } catch (error) {
-        this.$message.error(error.message)
-      }
-    },
+    // async getTable() {
+    //   try {
+    //     const { sid, tid } = this.$store.state.schema
+    //     const res = await api.table.get(sid, tid)
+    //     this.table = res.data
+    //   } catch (error) {
+    //     this.$message.error(error.message)
+    //   }
+    // },
     async updateTable() {
       try {
-        const { sid, tid } = this.$store.state.table
-        const res = await api.table.update(sid, tid, this.currentTable)
+        const { sid, tid } = this.$store.state.schema
+        const res = await api.table.update(sid, tid, this.table)
         console.log(res)
-        this.$message.success(`Update table ${this.currentTable.tableName}`)
+        this.$message.success(`Update table ${this.table.tableName}`)
       } catch (error) {
         this.$message.error(error.message)
       }
@@ -101,14 +104,14 @@ export default {
         const { sid, tid } = this.$store.state.table
         const res = await api.table.delete(sid, tid)
         console.log(res)
-        this.$message.success(`Delete schema ${this.currentTable.tableName}`)
+        this.$message.success(`Delete schema ${this.table.tableName}`)
       } catch (error) {
         this.$message.error(error.message)
       }
     },
   },
   mounted() {
-    this.getTable()
+    // this.getTable()
   },
 }
 </script>
