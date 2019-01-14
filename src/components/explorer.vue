@@ -31,6 +31,7 @@
           <a-input
             v-model="currentSchema.schemaName"
             @change="handleChangeSchema"
+            @pressEnter="handleCheckSchema"
           >
             <a-icon
               v-show="tempSchemaName !== currentSchema.schemaName"
@@ -44,6 +45,7 @@
           <a-input
             v-model="currentSchema.tables[currentTableIndex].tableName"
             @change="handleChangeTable"
+            @pressEnter="handleCheckTable"
           >
             <a-icon
               v-show="tempTableName !== currentSchema.tables[currentTableIndex].tableName"
