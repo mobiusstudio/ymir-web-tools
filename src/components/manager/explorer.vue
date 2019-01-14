@@ -30,6 +30,7 @@
         <a-form-item label="schema name" required>
           <a-input
             v-model="currentSchema.schemaName"
+            @blur="handleRecoverSchema"
             @change="handleChangeSchema"
             @pressEnter="handleCheckSchema"
           >
@@ -44,6 +45,7 @@
         <a-form-item label="table name" required>
           <a-input
             v-model="currentSchema.tables[currentTableIndex].tableName"
+            @blur="handleRecoverTable"
             @change="handleChangeTable"
             @pressEnter="handleCheckTable"
           >
@@ -163,6 +165,11 @@ export default {
       })
     },
 
+    handleRecoverSchema() {
+      this.currentSchema.schemaName = this.tempSchemaName
+      this.handleChangeSchema()
+    },
+
 
     // table
     showTables() {
@@ -216,6 +223,11 @@ export default {
       this.commitSchema({
         data: this.currentSchema,
       })
+    },
+
+    handleRecoverTable() {
+      this.currentSchema.tables[this.currentTableIndex].tableName = this.tempTableName
+      this.handleChangeTable()
     },
 
     async listSchema() {
