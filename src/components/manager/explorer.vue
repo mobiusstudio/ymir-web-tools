@@ -105,7 +105,8 @@ export default {
     return {
       isSchema: true,
       isTable: false,
-      isNew: false,
+      isNewSchema: false,
+      isNewTable: false,
       tempSchemaName: '',
       tempTableName: '',
     }
@@ -151,6 +152,14 @@ export default {
       this.schema.schemaName = this.tempSchemaName
     },
 
+    schemaCheck() {
+      if (!this.schema.schemaName) {
+        this.$message.error('Invalid empty schema name')
+        return false
+      }
+      return true
+    },
+
     commitSchema(payload) {
       this.$store.commit('change-schema', payload)
     },
@@ -174,14 +183,14 @@ export default {
     },
 
     handleSelectSchema(id) {
-      this.isNew = false
+      this.isNewSchema = false
       this.selectSchema(id)
       this.initTempName()
       this.showTables()
     },
 
     handleAddSchema() {
-      this.isNew = true
+      this.isNewSchema = true
       const schema = new Schema({
         schemaName: '',
       })
@@ -195,13 +204,14 @@ export default {
     },
 
     handleSaveSchema() {
+      if (!this.schemaCheck) return
       this.setTempSchemaName()
-      this.saveSchema(this.isNew)
+      this.saveSchema(this.isNewSchema)
     },
 
     handleChangeSchema() {
       this.schema.setSchemaName()
-      if (this.isNew) this.schema.tables[0].setTableName(this.schema.schemaName)
+      if (this.isNewSchema) this.schema.tables[0].setTableName(this.schema.schemaName)
       this.changeSchema(this.schema)
     },
 
@@ -216,6 +226,25 @@ export default {
     },
     resetTableName() {
       this.schema.tables[this.tid].tableName = this.tempTableName
+    },
+
+    tableCheck(payload = null) {
+      if (!this.schema.tables[this.tid].tableName) {
+        this.$message.error('Invalid empty table name')
+        return false
+      }
+      if (payload) {
+        const { isNew, tableName } = payload
+        if (
+          (isNew && this.schema.tables.some(table => table.tableName === tableName))
+          || (!isNew && this.schema.tables.some((table, index) => table.tableName === tableName
+              && index !== this.tid))
+        ) {
+          this.$message.error(`Duplicate table name: ${tableName}`)
+          return false
+        }
+      }
+      return true
     },
 
     commitTable(payload) {
@@ -237,16 +266,20 @@ export default {
     },
 
     handleSelectTable(id) {
+      this.isNewTable = false
       this.initTempName()
       this.selectTable(id)
     },
 
     handleAddTable() {
+      if (!this.tableCheck()) return
+      this.isNewTable = true
       const table = new Table({
         schemaName: this.schema.schemaName,
         tableName: '',
       })
       const id = this.schema.tables.push(table) - 1
+      this.tempTableName = ''
       this.changeSchema(this.schema)
       this.selectTable(id)
     },
@@ -260,6 +293,10 @@ export default {
     },
 
     handleSaveTable() {
+      if (!this.tableCheck({
+        isNew: this.isNewTable,
+        tableName: this.schema.tables[this.tid].tableName,
+      })) return
       this.setTempTableName()
       this.saveTable()
     },
