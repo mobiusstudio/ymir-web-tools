@@ -41,8 +41,6 @@
 </template>
 
 <script>
-import { upperFirst } from 'lodash'
-
 export default {
   props: {
     buttons: {
@@ -53,9 +51,9 @@ export default {
       type: String,
       required: true,
     },
-    btnKey: {
-      type: String,
-      required: true,
+    btnText: {
+      type: Function,
+      default: index => `${index}`,
     },
     btnClass: {
       type: String,
@@ -68,8 +66,7 @@ export default {
   },
   methods: {
     generateTitle(index) {
-      const title = this.buttons[index][this.btnKey] || '...'
-      return upperFirst(title)
+      return this.btnText(this.buttons, index)
     },
     generateClass(index) {
       return `${this.btnClass}${index === this.selected ? '-selected' : ''}`

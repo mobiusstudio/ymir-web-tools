@@ -4,7 +4,7 @@
       v-if="isSchema"
       :buttons="schemaArray"
       title="schema"
-      btn-key="schemaName"
+      :btn-text="generateSchemaBtnText"
       btn-class="schema-btn"
       @select="handleSelectSchema"
       @remove="handleRemoveSchema"
@@ -61,7 +61,7 @@
       <DynamicButtonList
         :buttons="currentSchema.tables"
         title="table"
-        btn-key="tableName"
+        :btn-text="generateTableBtnText"
         btn-class="table-btn"
         :selected="currentTableIndex"
         @select="handleSelectTable"
@@ -73,6 +73,7 @@
 </template>
 
 <script>
+import { upperFirst } from 'lodash'
 import DynamicButtonList from '../dynamic-button-list.vue'
 import { Schema, Table } from '../../libs/schema'
 import api from '../../facades/api'
@@ -99,6 +100,16 @@ export default {
   },
   computed: {},
   methods: {
+    generateSchemaBtnText(schemaArray, index) {
+      if (!schemaArray || schemaArray.length === 0) return ''
+      return upperFirst(schemaArray[index].schemaName)
+    },
+    generateTableBtnText(tableArray, index) {
+      console.log(tableArray[index])
+      if (!tableArray || tableArray.length === 0) return ''
+      return upperFirst(tableArray[index].tableName)
+    },
+
     handleClickBack() {
       this.listSchema()
       this.showSchemas()
