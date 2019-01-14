@@ -98,7 +98,7 @@
             </template>
           </a-button-group>
         </a-row>
-        <a-divider orientation="right">
+        <a-divider>
           <a-button
             shape="circle"
             icon="plus"
@@ -284,9 +284,7 @@ export default {
           id: res.id,
           data: this.currentSchema,
         })
-        this.commitTable({
-          id: 0,
-        })
+        this.handleSelectTable(0)
         this.$message.success(`Add new schema ${this.currentSchema.schemaName}`)
       } catch (error) {
         this.$message.error(error.message)
