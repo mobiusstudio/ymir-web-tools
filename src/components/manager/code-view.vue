@@ -38,9 +38,9 @@
 
 <script>
 import Clipboard from 'clipboard'
-import generateSql from '../templates/sql'
-import generateModel from '../templates/model'
-import generateController from '../templates/controller'
+import generateSql from '../../templates/sql'
+import generateModel from '../../templates/model'
+import generateController from '../../templates/controller'
 
 const viewMap = ['sql', 'model', 'controller']
 
@@ -66,7 +66,7 @@ export default {
       })
     },
     generateCode(view) {
-      const { data } = this.$store.state.table
+      const { data } = this.$store.state.schema
       if (!data) return ''
       switch (view) {
         case 'sql':

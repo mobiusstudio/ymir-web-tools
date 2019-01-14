@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import { Column } from '../libs/schema'
+import { Column } from '../../libs/schema'
 
 const columnKeyMap = Column.keyMap
 

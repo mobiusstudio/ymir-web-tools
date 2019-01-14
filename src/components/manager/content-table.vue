@@ -35,7 +35,7 @@
 
 <script>
 import TableDetail from './content-table-detail.vue'
-import api from '../facades/api'
+import api from '../../facades/api'
 
 export default {
   components: {

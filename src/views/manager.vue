@@ -14,10 +14,10 @@
 </template>
 
 <script>
-import Explorer from '../components/explorer.vue'
-import CodeView from '../components/code-view.vue'
-import ContentSwagger from '../components/content-swagger.vue'
-import ContentTable from '../components/content-table.vue'
+import Explorer from '../components/manager/explorer.vue'
+import CodeView from '../components/manager/code-view.vue'
+import ContentSwagger from '../components/manager/content-swagger.vue'
+import ContentTable from '../components/manager/content-table.vue'
 
 export default {
   components: {

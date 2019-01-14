@@ -71,9 +71,9 @@
 </template>
 
 <script>
-import DynamicButtonList from './dynamic-button-list.vue'
-import { Schema, Table } from '../libs/schema'
-import api from '../facades/api'
+import DynamicButtonList from '../dynamic-button-list.vue'
+import { Schema, Table } from '../../libs/schema'
+import api from '../../facades/api'
 
 export default {
   components: {

@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import swagger from '../../swagger/swagger'
+import swagger from '../../../swagger/swagger'
 
 const funcMap = ['get', 'post', 'patch', 'delete']
 
