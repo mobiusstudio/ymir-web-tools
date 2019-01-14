@@ -2,6 +2,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import { Schema } from './libs/schema'
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -9,7 +11,9 @@ export default new Vuex.Store({
     schema: {
       sid: 0,
       tid: 0,
-      data: undefined,
+      data: new Schema({
+        schemaName: '',
+      }),
     },
   },
   getters: {
