@@ -2,30 +2,14 @@ import { Schema, Table } from '../libs/schema'
 
 const api = {}
 
-const blankSchema = new Schema({
-  schemaName: '',
-})
-
 const getSchemaArray = () => {
-  const schemaArray = JSON.parse(localStorage.getItem('schemas-data')) || [blankSchema]
+  const schemaArray = JSON.parse(localStorage.getItem('schemas-data')) || []
   return schemaArray
 }
 const setSchemaArray = (schemaArray) => {
   const buffer = JSON.stringify(schemaArray)
   localStorage.setItem('schemas-data', buffer)
 }
-// const generateSchema = (schema) => {
-//   const { schemaName, tables } = schema
-//   const newTables = tables.map((table) => {
-//     const { tableName, pkeyIndex, columns } = table
-//     const newColumns = columns.map((column) => {
-//       const { type, name, alias, foreign, def, required } = column
-//       return new Column({ schemaName, tableName, type, name, alias, foreign, def, required })
-//     })
-//     return new Table({ schemaName, tableName, pkeyIndex, columns: newColumns })
-//   })
-//   return new Schema({ schemaName, tables: newTables })
-// }
 
 api.schema = {
   list: async () => {
@@ -71,15 +55,10 @@ api.schema = {
   },
 }
 
-const blankTable = new Table({
-  schemaName: '',
-  tableName: '',
-})
-
 const getTableArray = (sid) => {
   const schemaArray = getSchemaArray()
   console.log('sa', schemaArray)
-  const tables = schemaArray[sid].tables || [blankTable]
+  const tables = schemaArray[sid].tables || []
   console.log('ta', tables)
   return tables
 }

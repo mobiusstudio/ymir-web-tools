@@ -4,7 +4,7 @@
       {{ title }}
     </a-divider>
     <a-row type="flex" justify="center">
-      <a-form>
+      <a-form v-if="buttons.length > 0">
         <a-button-group>
           <template v-for="(item, index) of buttons">
             <a-form-item :key="index">
@@ -13,11 +13,11 @@
                 :mouse-enter-delay="1"
               >
                 <a-button
-                  :class="btnClass"
+                  :class="generateClass(index)"
                   @click="handleSelectButton(index)"
                   block
                 >
-                  {{ titleArray[index] }}
+                  {{ generateTitle(index) }}
                 </a-button>
                 <a-icon
                   slot="title"
@@ -61,13 +61,20 @@ export default {
       type: String,
       default: '',
     },
-  },
-  computed: {
-    titleArray() {
-      return this.buttons.map(button => upperFirst(button[this.btnKey]) || '...')
+    selected: {
+      type: Number,
+      default: undefined,
     },
   },
   methods: {
+    generateTitle(index) {
+      const title = this.buttons[index][this.btnKey] || '...'
+      return upperFirst(title)
+    },
+    generateClass(index) {
+      return `${this.btnClass}${index === this.selected ? '-selected' : ''}`
+    },
+
     handleSelectButton(index) {
       this.$emit('select', index)
     },
@@ -77,6 +84,9 @@ export default {
     handleAddButton() {
       this.$emit('add')
     },
+  },
+  mounted() {
+    console.log(this.buttons)
   },
 }
 </script>

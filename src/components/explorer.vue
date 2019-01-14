@@ -57,10 +57,11 @@
         </a-form-item>
       </a-form>
       <DynamicButtonList
-        :buttons="this.currentSchema.tables"
+        :buttons="currentSchema.tables"
         title="table"
         btn-key="tableName"
         btn-class="table-btn"
+        :selected="currentTableIndex"
         @select="handleSelectTable"
         @remove="handleRemoveTable"
         @add="handleAddTable"
@@ -85,9 +86,7 @@ export default {
       isNewSchema: false,
       isNewTable: false,
 
-      schemaArray: [new Schema({
-        schemaName: '',
-      })],
+      schemaArray: [],
       currentSchema: new Schema({
         schemaName: '',
       }),
@@ -308,6 +307,11 @@ export default {
     min-width: 120px;
     color: whitesmoke;
     background-color: #666;
+    &-selected {
+      min-width: 120px;
+      color: whitesmoke;
+      background-color: #888;
+    }
   }
 }
 </style>
