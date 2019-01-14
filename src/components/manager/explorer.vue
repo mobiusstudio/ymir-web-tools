@@ -2,7 +2,7 @@
   <div class="schema-manager">
     <DynamicButtonList
       v-if="isSchema"
-      :buttons="schemaArray"
+      :buttons="schemaList"
       title="schema"
       :btn-text="generateSchemaBtnText"
       btn-class="schema-btn"
@@ -29,41 +29,41 @@
       <a-form>
         <a-form-item label="schema name" required>
           <a-input
-            v-model="currentSchema.schemaName"
+            v-model="schema.schemaName"
             @blur="handleRecoverSchema"
             @change="handleChangeSchema"
-            @pressEnter="handleCheckSchema"
+            @pressEnter="handleSaveSchema"
           >
             <a-icon
-              v-show="tempSchemaName !== currentSchema.schemaName"
+              v-show="tempSchemaName !== schema.schemaName"
               slot="suffix"
               type="check"
-              @click="handleCheckSchema"
+              @click="handleSaveSchema"
             />
           </a-input>
         </a-form-item>
         <a-form-item label="table name" required>
           <a-input
-            v-model="currentSchema.tables[currentTableIndex].tableName"
+            v-model="schema.tables[tid].tableName"
             @blur="handleRecoverTable"
             @change="handleChangeTable"
-            @pressEnter="handleCheckTable"
+            @pressEnter="handleSaveTable"
           >
             <a-icon
-              v-show="tempTableName !== currentSchema.tables[currentTableIndex].tableName"
+              v-show="tempTableName !== schema.tables[tid].tableName"
               slot="suffix"
               type="check"
-              @click="handleCheckTable"
+              @click="handleSaveTable"
             />
           </a-input>
         </a-form-item>
       </a-form>
       <DynamicButtonList
-        :buttons="currentSchema.tables"
+        :buttons="schema.tables"
         title="table"
         :btn-text="generateTableBtnText"
         btn-class="table-btn"
-        :selected="currentTableIndex"
+        :selected="tid"
         @select="handleSelectTable"
         @remove="handleRemoveTable"
         @add="handleAddTable"
@@ -74,44 +74,56 @@
 
 <script>
 import { upperFirst } from 'lodash'
-import DynamicButtonList from '../dynamic-button-list.vue'
 import { Schema, Table } from '../../libs/schema'
-import api from '../../facades/api'
+import DynamicButtonList from '../dynamic-button-list.vue'
 
 export default {
   components: {
     DynamicButtonList,
   },
+  props: {
+    schemaList: {
+      type: Array,
+      required: true,
+    },
+    schema: {
+      type: Object,
+      required: true,
+      schemaName: {
+        type: String,
+        required: true,
+      },
+      tables: {
+        type: Array,
+        required: true,
+      },
+    },
+  },
   data() {
     return {
       isSchema: true,
       isTable: false,
-      isNewSchema: false,
-      isNewTable: false,
-
-      schemaArray: [],
-      currentSchema: new Schema({
-        schemaName: '',
-      }),
-      currentTableIndex: 0,
+      isNew: false,
       tempSchemaName: '',
       tempTableName: '',
     }
   },
-  computed: {},
-  methods: {
-    generateSchemaBtnText(schemaArray, index) {
-      if (!schemaArray || schemaArray.length === 0) return ''
-      return upperFirst(schemaArray[index].schemaName)
+  computed: {
+    tid() {
+      return this.$store.state.schema.tid
     },
-    generateTableBtnText(tableArray, index) {
-      console.log(tableArray[index])
-      if (!tableArray || tableArray.length === 0) return ''
-      return upperFirst(tableArray[index].tableName)
+  },
+  methods: {
+    generateSchemaBtnText(schemaList, index) {
+      if (!schemaList || schemaList.length === 0) return ''
+      return upperFirst(schemaList[index].schemaName)
+    },
+    generateTableBtnText(tableList, index) {
+      if (!tableList || tableList.length === 0) return ''
+      return upperFirst(tableList[index].tableName)
     },
 
     handleClickBack() {
-      this.listSchema()
       this.showSchemas()
       this.$emit('select', null)
     },
@@ -130,54 +142,64 @@ export default {
     },
 
     setTempName() {
-      this.tempSchemaName = this.currentSchema.schemaName
-      this.tempTableName = this.currentSchema.tables[this.currentTableIndex].tableName
+      this.tempSchemaName = this.schema.schemaName
+      this.tempTableName = this.schema.tables[this.tid].tableName
     },
 
     selectSchema(index) {
-      this.commitSchema({
-        id: index,
+      this.$emit('select-schema', index)
+    },
+    removeSchema(index) {
+      this.$emit('remove', index)
+    },
+    saveSchema(isNew) {
+      const { data } = this
+      this.$emit('save', {
+        isNew,
+        data,
       })
-      this.getSchema()
-      this.handleSelectTable(0)
+    },
+    changeSchema(data) {
+      this.commitSchema({
+        data,
+      })
     },
 
-    handleSelectSchema(sindex) {
-      this.isNewSchema = false
-      this.selectSchema(sindex)
+    handleSelectSchema(index) {
+      this.isNew = false
+      this.selectSchema(index)
+      this.selectTable(0)
+      this.setTempName()
       this.showTables()
     },
 
     handleAddSchema() {
-      this.isNewSchema = true
-      this.currentSchema = new Schema({
+      this.isNew = true
+      this.schema = new Schema({
         schemaName: '',
       })
-      this.handleSelectTable(0)
+      this.selectTable(0)
       this.setTempName()
       this.showTables()
     },
 
     handleRemoveSchema(index) {
-      this.deleteSchema(index)
+      this.removeSchema(index)
     },
 
-    handleCheckSchema() {
+    handleSaveSchema() {
       this.setTempName()
-      if (this.isNewSchema) this.addSchema()
-      else this.updateSchema()
+      this.saveSchema(this.isNew)
     },
 
     handleChangeSchema() {
-      this.currentSchema.setSchemaName()
-      if (this.isNewSchema) this.currentSchema.tables[0].setTableName(this.currentSchema.schemaName)
-      this.commitSchema({
-        data: this.currentSchema,
-      })
+      this.schema.setSchemaName()
+      if (this.isNew) this.schema.tables[0].setTableName(this.schema.schemaName)
+      this.changeSchema(this.schema)
     },
 
     handleRecoverSchema() {
-      this.currentSchema.schemaName = this.tempSchemaName
+      this.schema.schemaName = this.tempSchemaName
       this.handleChangeSchema()
     },
 
@@ -193,120 +215,60 @@ export default {
     },
 
     selectTable(index) {
-      this.currentTableIndex = index
-      this.setTempName()
+      this.$emit('select-table', index)
+    },
+    saveTable() {
+      this.saveSchema(false)
+    },
+    changeTable(data) {
       this.commitTable({
-        id: index,
+        data,
       })
     },
 
-    handleSelectTable(tindex) {
-      this.isNewTable = false
-      this.selectTable(tindex)
-      this.$emit('select', tindex)
+    handleSelectTable(index) {
+      this.selectTable(index)
+      this.setTempName()
     },
 
     handleAddTable() {
-      this.isNewTable = true
       const table = new Table({
-        schemaName: this.currentSchema.schemaName,
+        schemaName: this.schema.schemaName,
         tableName: '',
       })
-      const index = this.currentSchema.tables.push(table) - 1
-      this.currentTableIndex = index
+      const index = this.schema.tables.push(table) - 1
+      this.commitTable({
+        id: index,
+      })
       this.handleSelectTable(index)
     },
 
     handleRemoveTable(index) {
-      this.currentSchema.tables.splice(index, 1)
-      this.updateSchema()
+      this.schema.tables.splice(index, 1)
+      this.commitSchema({
+        data: this.schema,
+      })
+      this.saveSchema()
       const id = index === 0 ? 0 : index - 1
       this.handleSelectTable(id)
     },
 
-    handleCheckTable() {
+    handleSaveTable() {
       this.setTempName()
-      this.updateSchema()
+      this.saveTable()
     },
 
     handleChangeTable() {
-      this.currentSchema.tables[this.currentTableIndex].setTableName()
-      this.commitSchema({
-        data: this.currentSchema,
-      })
+      this.schema.tables[this.tid].setTableName()
+      this.changeTable(this.schema.tables[this.tid])
     },
 
     handleRecoverTable() {
-      this.currentSchema.tables[this.currentTableIndex].tableName = this.tempTableName
+      this.schema.tables[this.tid].tableName = this.tempTableName
       this.handleChangeTable()
-    },
-
-    async listSchema() {
-      try {
-        const res = await api.schema.list()
-        this.schemaArray = res.data
-      } catch (error) {
-        this.$message.error(error.message)
-      }
-    },
-
-    async getSchema() {
-      try {
-        const id = this.$store.state.schema.sid
-        const res = await api.schema.get(id)
-        const { schemaName, tables } = res.data
-        this.currentSchema = new Schema({
-          schemaName,
-          tables,
-        })
-        this.setTempName()
-        this.commitSchema({
-          data: this.currentSchema,
-        })
-      } catch (error) {
-        this.$message.error(error.message)
-      }
-    },
-
-    async addSchema() {
-      try {
-        const res = await api.schema.add(this.currentSchema)
-        this.commitSchema({
-          id: res.id,
-          data: this.currentSchema,
-        })
-        this.handleSelectTable(0)
-        this.$message.success(`Add new schema ${this.currentSchema.schemaName}`)
-      } catch (error) {
-        this.$message.error(error.message)
-      }
-    },
-    async updateSchema() {
-      try {
-        const id = this.$store.state.schema.sid
-        await api.schema.update(id, this.currentSchema)
-        this.commitSchema({
-          data: this.currentSchema,
-        })
-        this.$message.success(`Update schema ${this.currentSchema.schemaName}`)
-      } catch (error) {
-        this.$message.error(error.message)
-      }
-    },
-
-    async deleteSchema(index) {
-      try {
-        const id = index
-        await api.schema.delete(id)
-        this.$message.success(`Delete schema ${this.schemaArray[index].schemaName}`)
-        this.listSchema()
-      } catch (error) {
-        this.$message.error(error.message)
-      }
     },
   },
   mounted() {
-    this.listSchema()
   },
 }
 </script>

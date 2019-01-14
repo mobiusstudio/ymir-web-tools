@@ -1,5 +1,8 @@
 <template>
   <div class="content-table-detail">
+    <a-divider>
+      {{ title }}
+    </a-divider>
     <a-form layout="horizontal">
       <template v-for="key of columnKeyMap">
         <a-form-item
@@ -67,6 +70,10 @@ const wrapperCol = { span: 18, offset: 1 }
 
 export default {
   props: {
+    title: {
+      type: String,
+      default: 'title',
+    },
     column: {
       type: Object,
       default: new Column({

@@ -11,6 +11,7 @@ export default new Vuex.Store({
     schema: {
       sid: 0,
       tid: 0,
+      cid: 0,
       data: new Schema({
         schemaName: '',
       }),
@@ -19,8 +20,19 @@ export default new Vuex.Store({
   getters: {
   },
   mutations: {
+    'change-column': (state, payload) => {
+      if (payload.id || payload.id === 0) state.schema.cid = payload.id
+      if (payload.data) {
+        const { tid, cid } = state.schema
+        state.schema.data.tables[tid].columns[cid] = payload.data
+      }
+    },
     'change-table': (state, payload) => {
       if (payload.id || payload.id === 0) state.schema.tid = payload.id
+      if (payload.data) {
+        const { tid } = state.schema
+        state.schema.data.tables[tid] = payload.data
+      }
     },
     'change-schema': (state, payload) => {
       if (payload.id || payload.id === 0) state.schema.sid = payload.id

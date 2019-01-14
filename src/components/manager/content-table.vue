@@ -2,32 +2,22 @@
   <div class="content-table">
     <a-row type="flex" justify="space-between">
       <a-col :span="10" class="column-list">
-        <a-divider>
-          {{ columnListTitle }}
-        </a-divider>
-        <a-row type="flex" justify="center">
-          <a-form>
-            <a-button-group>
-              <template v-for="(column, index) of table.columns">
-                <a-form-item :key="index">
-                  <a-button
-                    class="column-list-button"
-                    @click="handleClickColumn(index)"
-                    block
-                  >
-                    {{ generateColumnButtonText(index) }}
-                  </a-button>
-                </a-form-item>
-              </template>
-            </a-button-group>
-          </a-form>
-        </a-row>
+        <DynamicButtonList
+          :buttons="table.columns"
+          :title="columnListTitle"
+          :btn-text="generateColumnBtnText"
+          btn-class="column-btn"
+          @select="handleSelectColumn"
+          @remove="handleRemoveColumn"
+          @add="handleAddColumn"
+        />
       </a-col>
       <a-col :span="12" class="column-detail">
-        <a-divider>
-          {{ generateColumnButtonText(currentColumnIndex) }}
-        </a-divider>
-        <TableDetail :column="table.columns[currentColumnIndex]" @change="handleChangeColumn" />
+        <TableDetail
+          :title="columnDetailTitle"
+          :column="table.columns[currentColumnIndex]"
+          @change="handleChangeColumn"
+        />
       </a-col>
     </a-row>
   </div>
@@ -35,11 +25,14 @@
 
 <script>
 import TableDetail from './content-table-detail.vue'
+import DynamicButtonList from '../dynamic-button-list.vue'
 import api from '../../facades/api'
+import { Column } from '../../libs/schema'
 
 export default {
   components: {
     TableDetail,
+    DynamicButtonList,
   },
   props: {
     table: {
@@ -56,16 +49,33 @@ export default {
     columnListTitle() {
       return `"${this.table.schemaName}".${this.table.tableName}`
     },
+    columnDetailTitle() {
+      return this.generateColumnBtnText(this.table.columns, this.currentColumnIndex)
+    },
   },
   methods: {
-    generateColumnButtonText(index) {
-      const { name = 'column', type = 'type' } = this.table.columns[index]
+    generateColumnBtnText(columns, index) {
+      const { name = 'column', type = 'type' } = columns[index]
       if (name || type) return `${name} <${type}>`
       return '...'
     },
 
-    handleClickColumn(index) {
+    handleSelectColumn(index) {
       this.currentColumnIndex = index
+    },
+    handleAddColumn() {
+      const { schemaName, tableName } = this.table
+      const column = new Column({
+        schemaName,
+        tableName,
+        type: '',
+        name: '',
+      })
+      const index = this.table.columns.push(column) - 1
+      this.currentColumnIndex = index
+      this.$emit('change')
+    },
+    handleRemoveColumn() {
     },
 
     handleChangeColumn(column) {

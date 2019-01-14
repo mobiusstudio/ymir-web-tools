@@ -52,10 +52,8 @@ export default {
   },
   methods: {
     handleClickCopy(contentType) {
-      console.log('click')
       this.clipboard.on('success', (e) => {
         this.$message.success(`${e.action} ${contentType} to clipboard.`)
-        console.log(e)
         e.clearSelection()
         this.clipboard.off('success')
       })

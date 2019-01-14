@@ -14,8 +14,9 @@ const setSchemaArray = (schemaArray) => {
 api.schema = {
   list: async () => {
     const schemaArray = getSchemaArray()
+    const list = schemaArray.map(schema => ({ schemaName: schema.schemaName }))
     return {
-      data: schemaArray,
+      data: list,
     }
   },
   get: async (id) => {
@@ -57,9 +58,7 @@ api.schema = {
 
 const getTableArray = (sid) => {
   const schemaArray = getSchemaArray()
-  console.log('sa', schemaArray)
   const tables = schemaArray[sid].tables || []
-  console.log('ta', tables)
   return tables
 }
 const setTableArray = (sid, tables) => {
@@ -77,7 +76,6 @@ api.table = {
   },
   get: (sid, tid) => {
     const tables = getTableArray(sid)
-    console.log(tables)
     return {
       data: tables[tid],
     }
