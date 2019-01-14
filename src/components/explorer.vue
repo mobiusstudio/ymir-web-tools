@@ -215,11 +215,12 @@ export default {
     handleAddTable() {
       this.isNewTable = true
       const table = new Table({
-        schemaName: '',
+        schemaName: this.currentSchema.schemaName,
         tableName: '',
       })
-      const length = this.currentSchema.tables.push(table)
-      this.currentTableIndex = length - 1
+      const index = this.currentSchema.tables.push(table) - 1
+      this.currentTableIndex = index
+      this.handleSelectTable(index)
     },
 
     handleRemoveTable(index) {
