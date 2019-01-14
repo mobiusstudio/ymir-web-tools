@@ -46,13 +46,11 @@ export default {
   },
   computed: {
     schema() {
-      const { data } = this.$store.state.schema
-      return data
+      return this.$store.state.schema
     },
     table() {
-      const { tid, data } = this.$store.state.schema
-      const table = data.tables[tid]
-      return table
+      const { tid } = this.$store.state
+      return this.$store.state.schema.tables[tid]
     },
   },
   methods: {
@@ -71,10 +69,12 @@ export default {
 
     handleSelectSchema(index) {
       this.getSchema(index)
+      this.showSchema()
       this.handleSelectTable(0)
     },
     handleSaveSchema(payload) {
       const { isNew, data } = payload
+      console.log(data)
       if (isNew) this.addSchema(data)
       else this.updateSchema(data)
     },
@@ -112,19 +112,19 @@ export default {
           data,
         })
         this.handleSelectTable(0)
-        this.$message.success(`Add new schema ${this.currentSchema.schemaName}`)
+        this.$message.success(`Add new schema ${data.schemaName}`)
       } catch (error) {
         this.$message.error(error.message)
       }
     },
     async updateSchema(data) {
       try {
-        const id = this.$store.state.schema.sid
+        const id = this.$store.state.sid
         await api.schema.update(id, data)
         this.commitSchema({
           data,
         })
-        this.$message.success(`Update schema ${this.currentSchema.schemaName}`)
+        this.$message.success(`Update schema ${data.schemaName}`)
       } catch (error) {
         this.$message.error(error.message)
       }
@@ -150,7 +150,6 @@ export default {
         this.hideSchema()
         this.listSchema()
       } else {
-        this.showSchema()
         this.commitTable({
           id: index,
         })

@@ -21,8 +21,12 @@ api.schema = {
   },
   get: async (id) => {
     const schemaArray = getSchemaArray()
+    const { schemaName, tables } = schemaArray[id]
     return {
-      data: schemaArray[id],
+      data: new Schema({
+        schemaName,
+        tables,
+      }),
     }
   },
   add: async (data) => {
@@ -76,8 +80,13 @@ api.table = {
   },
   get: (sid, tid) => {
     const tables = getTableArray(sid)
+    const { schemaName, tableName, columns } = tables[tid]
     return {
-      data: tables[tid],
+      data: new Table({
+        schemaName,
+        tableName,
+        columns,
+      }),
     }
   },
   add: async (sid, data) => {

@@ -30,12 +30,13 @@
         <a-form-item label="schema name" required>
           <a-input
             v-model="schema.schemaName"
-            @blur="handleRecoverSchema"
+            @focus="setTempSchemaName"
+            @blur="resetSchemaName"
             @change="handleChangeSchema"
             @pressEnter="handleSaveSchema"
           >
             <a-icon
-              v-show="tempSchemaName !== schema.schemaName"
+              v-show="tempSchemaName && tempSchemaName !== schema.schemaName"
               slot="suffix"
               type="check"
               @click="handleSaveSchema"
@@ -45,12 +46,13 @@
         <a-form-item label="table name" required>
           <a-input
             v-model="schema.tables[tid].tableName"
-            @blur="handleRecoverTable"
+            @focus="setTempTableName"
+            @blur="resetTableName"
             @change="handleChangeTable"
             @pressEnter="handleSaveTable"
           >
             <a-icon
-              v-show="tempTableName !== schema.tables[tid].tableName"
+              v-show="tempTableName && tempTableName !== schema.tables[tid].tableName"
               slot="suffix"
               type="check"
               @click="handleSaveTable"
@@ -108,9 +110,14 @@ export default {
       tempTableName: '',
     }
   },
+  watch: {
+    tempSchemaName(oldV, newV) {
+      console.log(oldV, newV)
+    },
+  },
   computed: {
     tid() {
-      return this.$store.state.schema.tid
+      return this.$store.state.tid
     },
   },
   methods: {
@@ -141,9 +148,11 @@ export default {
       this.$store.commit('change-schema', payload)
     },
 
-    setTempName() {
+    setTempSchemaName() {
       this.tempSchemaName = this.schema.schemaName
-      this.tempTableName = this.schema.tables[this.tid].tableName
+    },
+    resetSchemaName() {
+      this.schema.schemaName = this.tempSchemaName
     },
 
     selectSchema(index) {
@@ -153,10 +162,9 @@ export default {
       this.$emit('remove', index)
     },
     saveSchema(isNew) {
-      const { data } = this
       this.$emit('save', {
         isNew,
-        data,
+        data: this.schema,
       })
     },
     changeSchema(data) {
@@ -168,8 +176,6 @@ export default {
     handleSelectSchema(index) {
       this.isNew = false
       this.selectSchema(index)
-      this.selectTable(0)
-      this.setTempName()
       this.showTables()
     },
 
@@ -179,7 +185,6 @@ export default {
         schemaName: '',
       })
       this.selectTable(0)
-      this.setTempName()
       this.showTables()
     },
 
@@ -188,7 +193,7 @@ export default {
     },
 
     handleSaveSchema() {
-      this.setTempName()
+      this.setTempSchemaName()
       this.saveSchema(this.isNew)
     },
 
@@ -198,12 +203,6 @@ export default {
       this.changeSchema(this.schema)
     },
 
-    handleRecoverSchema() {
-      this.schema.schemaName = this.tempSchemaName
-      this.handleChangeSchema()
-    },
-
-
     // table
     showTables() {
       this.isSchema = false
@@ -212,6 +211,13 @@ export default {
 
     commitTable(payload) {
       this.$store.commit('change-table', payload)
+    },
+
+    setTempTableName() {
+      this.tempTableName = this.schema.tables[this.tid].tableName
+    },
+    resetTableName() {
+      this.schema.tables[this.tid].tableName = this.tempTableName
     },
 
     selectTable(index) {
@@ -228,7 +234,6 @@ export default {
 
     handleSelectTable(index) {
       this.selectTable(index)
-      this.setTempName()
     },
 
     handleAddTable() {
@@ -254,18 +259,13 @@ export default {
     },
 
     handleSaveTable() {
-      this.setTempName()
+      this.setTempTableName()
       this.saveTable()
     },
 
     handleChangeTable() {
       this.schema.tables[this.tid].setTableName()
       this.changeTable(this.schema.tables[this.tid])
-    },
-
-    handleRecoverTable() {
-      this.schema.tables[this.tid].tableName = this.tempTableName
-      this.handleChangeTable()
     },
   },
   mounted() {
