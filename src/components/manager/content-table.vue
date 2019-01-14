@@ -15,7 +15,7 @@
       <a-col :span="12" class="column-detail">
         <TableDetail
           :title="columnDetailTitle"
-          :column="table.columns[currentColumnIndex]"
+          :column="table.columns[cid]"
           @change="handleChangeColumn"
         />
       </a-col>
@@ -26,7 +26,6 @@
 <script>
 import TableDetail from './content-table-detail.vue'
 import DynamicButtonList from '../dynamic-button-list.vue'
-import api from '../../facades/api'
 import { Column } from '../../libs/schema'
 
 export default {
@@ -40,29 +39,64 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      currentColumnIndex: 0,
-    }
-  },
   computed: {
+    cid() {
+      return this.$store.state.cid
+    },
     columnListTitle() {
       return `"${this.table.schemaName}".${this.table.tableName}`
     },
     columnDetailTitle() {
-      return this.generateColumnBtnText(this.table.columns, this.currentColumnIndex)
+      return this.generateColumnBtnText(this.table.columns, this.cid)
     },
   },
   methods: {
     generateColumnBtnText(columns, index) {
-      const { name = 'column', type = 'type' } = columns[index]
+      const { name, type } = columns[index]
       if (name || type) return `${name} <${type}>`
       return '...'
     },
 
-    handleSelectColumn(index) {
-      this.currentColumnIndex = index
+    commitTable(payload) {
+      this.$store.commit('change-table', payload)
     },
+
+    saveTable(data) {
+      this.$emit('save', {
+        data,
+      })
+    },
+
+    changeTable(data) {
+      this.commitTable({
+        data,
+      })
+    },
+
+    commitColumn(payload) {
+      this.$store.commit('change-column', payload)
+    },
+
+    selectColumn(id) {
+      this.commitColumn({
+        id,
+      })
+    },
+
+    saveColumn() {
+      this.saveTable(this.table)
+    },
+
+    changeColumn(data) {
+      this.commitColumn({
+        data,
+      })
+    },
+
+    handleSelectColumn(id) {
+      this.selectColumn(id)
+    },
+
     handleAddColumn() {
       const { schemaName, tableName } = this.table
       const column = new Column({
@@ -71,53 +105,20 @@ export default {
         type: '',
         name: '',
       })
-      const index = this.table.columns.push(column) - 1
-      this.currentColumnIndex = index
-      this.$emit('change')
-    },
-    handleRemoveColumn() {
+      const id = this.table.columns.push(column) - 1
+      this.changeTable(this.table)
+      this.selectColumn(id)
     },
 
-    handleChangeColumn(column) {
-      this.table.columns[this.currentColumnIndex] = column
-      this.commitTable()
+    handleRemoveColumn(index) {
+      this.table.columns.splice(index, 1)
+      this.changeTable(this.table)
+      const id = index === 0 ? 0 : index - 1
+      this.selectColumn(id)
     },
 
-    commitTable(payload) {
-      this.$store.commit('change-table', payload)
-    },
-    commitSchema(payload) {
-      this.$store.commit('change-schema', payload)
-    },
-
-    // async getTable() {
-    //   try {
-    //     const { sid, tid } = this.$store.state.schema
-    //     const res = await api.table.get(sid, tid)
-    //     this.table = res.data
-    //   } catch (error) {
-    //     this.$message.error(error.message)
-    //   }
-    // },
-    async updateTable() {
-      try {
-        const { sid, tid } = this.$store.state.schema
-        const res = await api.table.update(sid, tid, this.table)
-        console.log(res)
-        this.$message.success(`Update table ${this.table.tableName}`)
-      } catch (error) {
-        this.$message.error(error.message)
-      }
-    },
-    async deleteTable() {
-      try {
-        const { sid, tid } = this.$store.state.table
-        const res = await api.table.delete(sid, tid)
-        console.log(res)
-        this.$message.success(`Delete schema ${this.table.tableName}`)
-      } catch (error) {
-        this.$message.error(error.message)
-      }
+    handleChangeColumn(data) {
+      this.changeColumn(data)
     },
   },
   mounted() {

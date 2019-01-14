@@ -110,11 +110,6 @@ export default {
       tempTableName: '',
     }
   },
-  watch: {
-    tempSchemaName(oldV, newV) {
-      console.log(oldV, newV)
-    },
-  },
   computed: {
     tid() {
       return this.$store.state.tid
@@ -127,7 +122,7 @@ export default {
     },
     generateTableBtnText(tableList, index) {
       if (!tableList || tableList.length === 0) return ''
-      return upperFirst(tableList[index].tableName)
+      return upperFirst(tableList[index].tableName || '...')
     },
 
     handleClickBack() {
@@ -138,14 +133,15 @@ export default {
     handleClickApply() {
     },
 
+    initTempName() {
+      this.tempSchemaName = ''
+      this.tempTableName = ''
+    },
+
     // schema
     showSchemas() {
       this.isSchema = true
       this.isTable = false
-    },
-
-    commitSchema(payload) {
-      this.$store.commit('change-schema', payload)
     },
 
     setTempSchemaName() {
@@ -155,13 +151,17 @@ export default {
       this.schema.schemaName = this.tempSchemaName
     },
 
-    selectSchema(index) {
-      this.$emit('select-schema', index)
+    commitSchema(payload) {
+      this.$store.commit('change-schema', payload)
     },
-    removeSchema(index) {
-      this.$emit('remove', index)
+
+    selectSchema(id) {
+      this.$emit('select-schema', id)
     },
-    saveSchema(isNew) {
+    removeSchema(id) {
+      this.$emit('remove', id)
+    },
+    saveSchema(isNew = false) {
       this.$emit('save', {
         isNew,
         data: this.schema,
@@ -173,23 +173,25 @@ export default {
       })
     },
 
-    handleSelectSchema(index) {
+    handleSelectSchema(id) {
       this.isNew = false
-      this.selectSchema(index)
+      this.selectSchema(id)
+      this.initTempName()
       this.showTables()
     },
 
     handleAddSchema() {
       this.isNew = true
-      this.schema = new Schema({
+      const schema = new Schema({
         schemaName: '',
       })
+      this.changeSchema(schema)
       this.selectTable(0)
       this.showTables()
     },
 
-    handleRemoveSchema(index) {
-      this.removeSchema(index)
+    handleRemoveSchema(id) {
+      this.removeSchema(id)
     },
 
     handleSaveSchema() {
@@ -209,10 +211,6 @@ export default {
       this.isTable = true
     },
 
-    commitTable(payload) {
-      this.$store.commit('change-table', payload)
-    },
-
     setTempTableName() {
       this.tempTableName = this.schema.tables[this.tid].tableName
     },
@@ -220,11 +218,17 @@ export default {
       this.schema.tables[this.tid].tableName = this.tempTableName
     },
 
-    selectTable(index) {
-      this.$emit('select-table', index)
+    commitTable(payload) {
+      this.$store.commit('change-table', payload)
+    },
+
+    selectTable(id) {
+      this.commitTable({
+        id,
+      })
     },
     saveTable() {
-      this.saveSchema(false)
+      this.saveSchema()
     },
     changeTable(data) {
       this.commitTable({
@@ -232,8 +236,9 @@ export default {
       })
     },
 
-    handleSelectTable(index) {
-      this.selectTable(index)
+    handleSelectTable(id) {
+      this.initTempName()
+      this.selectTable(id)
     },
 
     handleAddTable() {
@@ -241,21 +246,17 @@ export default {
         schemaName: this.schema.schemaName,
         tableName: '',
       })
-      const index = this.schema.tables.push(table) - 1
-      this.commitTable({
-        id: index,
-      })
-      this.handleSelectTable(index)
+      const id = this.schema.tables.push(table) - 1
+      this.changeSchema(this.schema)
+      this.selectTable(id)
     },
 
     handleRemoveTable(index) {
       this.schema.tables.splice(index, 1)
-      this.commitSchema({
-        data: this.schema,
-      })
+      this.changeSchema(this.schema)
       this.saveSchema()
       const id = index === 0 ? 0 : index - 1
-      this.handleSelectTable(id)
+      this.selectTable(id)
     },
 
     handleSaveTable() {

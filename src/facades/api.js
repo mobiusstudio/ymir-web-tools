@@ -30,6 +30,7 @@ api.schema = {
     }
   },
   add: async (data) => {
+    if (!data.schemaName) throw new Error('Invalid empty schema name')
     const schemaArray = getSchemaArray()
     if (schemaArray.every(item => item.schemaName.toLowerCase() !== data.schemaName.toLowerCase())) {
       const { schemaName, tables } = data
@@ -43,6 +44,7 @@ api.schema = {
     throw new Error(`Duplicate schema name ${data.schemaName}`)
   },
   update: async (id, data) => {
+    if (!data.schemaName) throw new Error('Invalid empty schema name')
     const schemaArray = getSchemaArray()
     if (schemaArray.some((item, i) => item.schemaName.toLowerCase() === data.schemaName.toLowerCase() && i !== id)) {
       throw new Error(`Duplicate schema name ${data.schemaName}`)
@@ -90,6 +92,7 @@ api.table = {
     }
   },
   add: async (sid, data) => {
+    if (!data.tableName) throw new Error('Invalid empty table name')
     const tables = getTableArray(sid)
     if (tables.every(item => item.tableName.toLowerCase() !== data.tableName.toLowerCase())) {
       const { schemaName, tableName, pkeyIndex, columns } = data
@@ -103,6 +106,7 @@ api.table = {
     throw new Error(`Duplicate table name ${data.tableName}`)
   },
   update: async (sid, tid, data) => {
+    if (!data.tableName) throw new Error('Invalid empty table name')
     const tables = getTableArray(sid)
     if (tables.some((item, id) => item.tableName.toLowerCase() === data.tableName.toLowerCase() && id !== tid)) {
       throw new Error(`Duplicate table name ${data.tableName}`)
