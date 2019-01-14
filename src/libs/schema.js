@@ -1,8 +1,8 @@
-import { BaseColumn } from '../../../ymir-models/core/model/column-base'
-
-export class Column extends BaseColumn {
+/* eslint-disable no-param-reassign */
+export class Column {
   constructor({
-    table = '',
+    schemaName = '',
+    tableName = '',
     type,
     name,
     alias = null,
@@ -10,7 +10,14 @@ export class Column extends BaseColumn {
     def = null,
     required = false,
   }) {
-    super({ table, type, name, alias, foreign, def, required })
+    this.schemaName = schemaName
+    this.tableName = tableName
+    this.type = type
+    this.name = name
+    this.alias = alias
+    this.foreign = foreign
+    this.def = def
+    this.required = required
   }
 
   static keyMap = ['type', 'name', 'alias', 'foreign']
@@ -21,10 +28,10 @@ export class Table {
     schemaName,
     tableName,
     pkeyIndex = 0,
-    columnArray = [
+    columns = [
       new Column({
-        table: tableName,
-        columnType: '',
+        tableName,
+        type: '',
         name: '',
       }),
     ],
@@ -32,10 +39,40 @@ export class Table {
     this.schemaName = schemaName
     this.tableName = tableName
     this.pkeyIndex = pkeyIndex
-    this.columnArray = columnArray.map((item) => {
-      const newItem = item
-      newItem.table = `"${this.schemaName}".${this.tableName}`
-      return newItem
+    this.columns = columns.map((column) => {
+      const {
+        type,
+        name,
+        alias = '',
+        foreign = '',
+        def = undefined,
+        required = false,
+      } = column
+      const newColumn = new Column({
+        schemaName,
+        tableName,
+        type,
+        name,
+        alias,
+        foreign,
+        def,
+        required,
+      })
+      return newColumn
+    })
+  }
+
+  setSchemaName(schemaName) {
+    this.schemaName = schemaName
+    this.columns.forEach((column) => {
+      column.schemaName = schemaName
+    })
+  }
+
+  setTableName(tableName) {
+    this.tableName = tableName
+    this.columns.forEach((column) => {
+      column.tableName = tableName
     })
   }
 }
@@ -43,7 +80,7 @@ export class Table {
 export class Schema {
   constructor({
     schemaName,
-    tableArray = [
+    tables = [
       new Table({
         schemaName,
         tableName: '',
@@ -51,10 +88,26 @@ export class Schema {
     ],
   }) {
     this.schemaName = schemaName
-    this.tableArray = tableArray.map((item) => {
-      const newItem = item
-      newItem.schemaName = this.schemaName
-      return newItem
+    this.tables = tables.map((table) => {
+      const {
+        tableName,
+        pkeyIndex,
+        columns,
+      } = table
+      const newTable = new Table({
+        schemaName,
+        tableName,
+        pkeyIndex,
+        columns,
+      })
+      return newTable
+    })
+  }
+
+  setSchemaName(schemaName) {
+    this.schemaName = schemaName
+    this.tables.forEach((table) => {
+      table.setSchemaName(schemaName)
     })
   }
 }

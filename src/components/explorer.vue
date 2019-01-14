@@ -68,11 +68,11 @@
         </a-form-item>
         <a-form-item label="table name" required>
           <a-input
-            v-model="currentSchema.tableArray[currentTableIndex].tableName"
+            v-model="currentSchema.tables[currentTableIndex].tableName"
             @change="handleChangeTable()"
           >
             <a-icon
-              v-show="tempTableName !== currentSchema.tableArray[currentTableIndex].tableName"
+              v-show="tempTableName !== currentSchema.tables[currentTableIndex].tableName"
               slot="suffix"
               type="check"
               @click="handleCheckTable()"
@@ -84,7 +84,7 @@
         </a-divider>
         <a-row type="flex" justify="center">
           <a-button-group>
-            <template v-for="(table, index) of currentSchema.tableArray">
+            <template v-for="(table, index) of currentSchema.tables">
               <a-form-item :key="index">
                 <a-button
                   v-if="table.tableName || currentSchema.schemaName"
@@ -160,7 +160,7 @@ export default {
 
     setTempName() {
       this.tempSchemaName = this.currentSchema.schemaName
-      this.tempTableName = this.currentSchema.tableArray[this.currentTableIndex].tableName
+      this.tempTableName = this.currentSchema.tables[this.currentTableIndex].tableName
     },
 
     handleAddSchema() {
@@ -194,7 +194,7 @@ export default {
     },
 
     handleChangeSchema() {
-      if (this.isNewSchema) this.currentSchema.tableArray[0].tableName = this.currentSchema.schemaName
+      if (this.isNewSchema) this.currentSchema.tables[0].setTableName(this.currentSchema.schemaName)
       this.commitSchema({
         data: this.currentSchema,
       })
@@ -217,12 +217,12 @@ export default {
         schemaName: '',
         tableName: '',
       })
-      const length = this.currentSchema.tableArray.push(table)
+      const length = this.currentSchema.tables.push(table)
       this.currentTableIndex = length - 1
     },
 
     handleRemoveTable(index) {
-      this.currentSchema.tableArray.splice(index, 1)
+      this.currentSchema.tables.splice(index, 1)
       this.updateSchema()
     },
 
@@ -260,9 +260,13 @@ export default {
       try {
         const id = this.$store.state.schema.sid
         const res = await api.schema.get(id)
-        this.currentSchema = res.data
+        const { schemaName, tables } = res.data
+        this.currentSchema = new Schema({
+          schemaName,
+          tables,
+        })
         this.tempSchemaName = this.currentSchema.schemaName
-        this.tempTableName = this.currentSchema.tableArray[0].tableName
+        this.tempTableName = this.currentSchema.tables[0].tableName
         this.commitSchema({
           data: this.currentSchema,
         })
@@ -303,7 +307,7 @@ export default {
       try {
         const id = index
         await api.schema.delete(id)
-        this.$message.success(`Delete schema ${this.currentSchema.schemaName}`)
+        this.$message.success(`Delete schema ${this.schemaArray[index].schemaName}`)
         this.listSchema()
       } catch (error) {
         this.$message.error(error.message)
