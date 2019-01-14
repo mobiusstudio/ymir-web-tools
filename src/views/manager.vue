@@ -1,91 +1,181 @@
 <template>
   <div class="manager">
     <div class="left-panel">
-      <SchemaManager @change="handleChangeSchema"/>
+      <Explorer
+        :schema-list="schemaList"
+        :schema="schema"
+        @select-schema="handleSelectSchema"
+        @save="handleSaveSchema"
+        @remove="handleRemoveSchema"
+      />
     </div>
     <div class="content-panel">
-      <template v-for="(tag, tindex) of newSwagger.tags">
-        <div :key="tindex">
-          <a-divider orientation="left">{{tag.name}}</a-divider>
-          <a-collapse :accordion="isAccordion">
-            <template v-for="(pathName, pindex) of Object.keys(newSwagger.paths)">
-              <template v-for="(funcName, findex) of funcMap">
-                <a-collapse-panel :key="`${pindex}_${findex}`" v-if="newSwagger.paths[pathName][funcName] && newSwagger.paths[pathName][funcName].tags.includes(tag.name)">
-                  <div slot="header">
-                    <span>{{funcName.toUpperCase()}}: </span>
-                    <span>{{pathName}}</span>
-                  </div>
-                  <a-collapse :accordion="isAccordion">
-                    <a-collapse-panel>
-                      <div slot="header">
-                        <span>operationId: </span>
-                        <span>{{newSwagger.paths[pathName][funcName].operationId}}</span>
-                      </div>
-                      <p>text......</p>
-                    </a-collapse-panel>
-                    <a-collapse-panel></a-collapse-panel>
-                    <a-collapse-panel></a-collapse-panel>
-                    <a-collapse-panel></a-collapse-panel>
-                    <a-collapse-panel></a-collapse-panel>
-                  </a-collapse>
-                </a-collapse-panel>
-              </template>
-            </template>
-          </a-collapse>
-        </div>
-      </template>
+      <!-- <ContentSwagger v-if="isSwagger" /> -->
+      <ContentTable
+        v-if="isTable"
+        :table="table"
+        @save="handleSaveTable"
+      />
     </div>
     <div class="right-panel">
-      <CodeView :schema="currentSchema"/>
+      <!-- <CodeView /> -->
     </div>
   </div>
 </template>
 
 <script>
-import { cloneDeep } from 'lodash'
-import SchemaManager from '../components/schema-manager.vue'
-import CodeView from '../components/code-view.vue'
-import swagger from '../../swagger/swagger'
-// import { Task } from '../../../ymir-models/src/models'
+import Explorer from '../components/manager/explorer.vue'
+import CodeView from '../components/manager/code-view.vue'
+import ContentSwagger from '../components/manager/content-swagger.vue'
+import ContentTable from '../components/manager/content-table.vue'
+import api from '../facades/api'
 
-const funcMap = ['get', 'post', 'patch', 'delete']
-// const schemas = [
-//   new Task(),
-//   { schemaName: 'user' },
-//   { schemaName: 'profile' },
-//   { schemaName: 'question' },
-//   { schemaName: 'answer' },
-// ]
 export default {
   components: {
-    SchemaManager,
+    Explorer,
     CodeView,
+    ContentSwagger,
+    ContentTable,
   },
   data() {
     return {
-      newSwagger: cloneDeep(swagger),
-      funcMap,
-
-      isAccordion: false,
-      currentSchema: null,
+      isSwagger: false,
+      isTable: false,
+      schemaList: [],
     }
   },
   computed: {
-    // isFuncIn (pathName, funcName, tag) {
-    //   console.log('here', pathName, funcName, tag)
-    //   return
-    // }
+    schema() {
+      return this.$store.state.schema
+    },
+    table() {
+      const { tid } = this.$store.state
+      return this.$store.state.schema.tables[tid]
+    },
   },
   methods: {
-    handleChangeSchema(schema) {
-      this.currentSchema = schema
+    showTable() {
+      this.isSwagger = false
+      this.isTable = true
     },
-    initPage() {
-      console.log(swagger)
+    hideTable() {
+      this.isTable = false
     },
+
+    // schema
+    commitSchema(payload) {
+      this.$store.commit('change-schema', payload)
+    },
+
+    saveSchema(isNew, data) {
+      console.log(isNew, this.$store.state.sid)
+      if (isNew) this.addSchema(data)
+      else this.updateSchema(data)
+    },
+
+    selectSchema(id) {
+      this.commitSchema({
+        id,
+      })
+    },
+
+    changeSchema(data) {
+      this.commitSchema({
+        data,
+      })
+    },
+
+    handleSelectSchema(id) {
+      if (id === null || id === undefined) {
+        this.hideTable()
+        this.listSchema()
+      } else {
+        this.getSchema(id)
+        this.selectSchema(id)
+        this.selectTable(0)
+        this.showTable()
+      }
+    },
+
+    handleSaveSchema(payload) {
+      const { isNew, data } = payload
+      this.saveSchema(isNew, data)
+    },
+
+    handleRemoveSchema(index) {
+      this.deleteSchema(index)
+    },
+
+    async listSchema() {
+      try {
+        const res = await api.schema.list()
+        this.schemaList = res.data
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+
+    async getSchema(id) {
+      try {
+        const res = await api.schema.get(id)
+        this.changeSchema(res.data)
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+
+    async addSchema(data) {
+      try {
+        const res = await api.schema.add(data)
+        this.selectSchema({
+          id: res.id,
+        })
+        this.selectTable(0)
+        this.$message.success(`Add new schema ${data.schemaName}`)
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+    async updateSchema(data) {
+      try {
+        const id = this.$store.state.sid
+        await api.schema.update(id, data)
+        this.$message.success(`Update schema ${data.schemaName}`)
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+
+    async deleteSchema(id) {
+      try {
+        await api.schema.delete(id)
+        this.$message.success(`Delete schema ${this.schemaList[id].schemaName}`)
+        this.listSchema()
+      } catch (error) {
+        this.$message.error(error.message)
+      }
+    },
+
+    // table
+    commitTable(payload) {
+      this.$store.commit('change-table', payload)
+    },
+
+    selectTable(id) {
+      this.commitTable({
+        id,
+      })
+    },
+    handleSaveTable() {
+
+    },
+
   },
   mounted() {
-    this.initPage()
+    this.listSchema()
+    // const { fakeSchemaArray } = require('../mock/schema')
+    // const buffer = JSON.stringify(fakeSchemaArray)
+    // localStorage.setItem('schemas-data', buffer)
   },
 }
 </script>
@@ -99,14 +189,14 @@ export default {
   .left-panel {
     position: absolute;
     left: 0;
-    width: 25%;
+    width: 15%;
     min-height: 100%;
     border-right: 2px #333 solid;
     overflow-y: scroll;
   }
   .content-panel {
     position: absolute;
-    left: 25%;
+    left: 15%;
     right: 35%;
     min-height: 100%;
     padding: 20px;

@@ -2,7 +2,7 @@
   <div id="app">
     <a-layout>
       <a-layout-header>Swagger - Management - Tools</a-layout-header>
-      <a-layout-content><router-view/></a-layout-content>
+      <a-layout-content><router-view /></a-layout-content>
       <a-layout-footer><span>Mobius Studio - Ymir</span></a-layout-footer>
     </a-layout>
   </div>
@@ -11,7 +11,7 @@
 <script>
 
 export default {
-  name: 'app',
+  name: 'App',
   components: {
   },
 }

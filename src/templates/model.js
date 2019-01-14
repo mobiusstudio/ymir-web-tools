@@ -1,4 +1,6 @@
-const modelizeColumns = (columns) => {
+import { upperFirst } from 'lodash'
+
+const generateColumns = (columns) => {
   const columnArray = []
   columns.forEach((column) => {
     const keyMap = ['name', 'type', 'alias', 'foreign', 'def', 'required']
@@ -20,17 +22,17 @@ const modelizeColumns = (columns) => {
   return columnArray.join('\n')
 }
 
-const modelizeSchema = (schema) => {
+const generateModel = (schema) => {
   const { schemaName, tableName, columns } = schema
   // eslint-disable-next-line operator-linebreak
-  const code =
+  const code = // TODO: path should be smart
 `import { DatabaseTable, Column, ColumnArray } from './core'
 
-export class Task extends DatabaseTable {
+export class ${upperFirst(tableName)} extends DatabaseTable {
   constructor() {
     super('${schemaName}', '${tableName}')
     this.columns = new ColumnArray([
-${modelizeColumns(columns)}
+${generateColumns(columns)}
     ], this.tableName)
   }
 }
@@ -38,4 +40,4 @@ ${modelizeColumns(columns)}
   return code
 }
 
-export default modelizeSchema
+export default generateModel
