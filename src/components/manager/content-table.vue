@@ -1,7 +1,18 @@
 <template>
   <div class="content-table">
+    <a-row type="flex" justify="center">
+      <a-divider>
+        primary key
+      </a-divider>
+      <a-radio-group
+        style="margin:10px 0;"
+        :options="columnGroup"
+        v-model="table.pkeyIndex"
+        @change="handleChangeTable"
+      />
+    </a-row>
     <a-row type="flex" justify="space-between">
-      <a-col :span="10" class="column-list">
+      <a-col :span="12" class="column-list">
         <DynamicButtonList
           :buttons="table.columns"
           :title="columnListTitle"
@@ -55,6 +66,12 @@ export default {
     },
     column() {
       return this.table.columns[this.cid]
+    },
+    columnGroup() {
+      return this.table.columns.map((column, index) => ({
+        label: column.name,
+        value: index,
+      }))
     },
     columnListTitle() {
       return `"${this.table.schemaName}".${this.table.tableName}`
@@ -165,6 +182,10 @@ export default {
     },
 
     // slect & change
+    handleChangeTable() {
+      const data = this.table
+      this.changeTable(data)
+    },
     handleSelectColumn(id) {
       this.isNewColumn = false
       this.selectColumn(id)
@@ -185,7 +206,7 @@ export default {
 <style lang="less">
 .content-table {
   .column-btn-selected {
-    font-weight: bold;
+    font-style: italic;
   }
 }
 </style>

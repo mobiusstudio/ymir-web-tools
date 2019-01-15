@@ -62,7 +62,7 @@ export default {
       default: '',
     },
     margin: {
-      type: String || Number,
+      type: [String, Number],
       default: 24,
     },
     selected: {
@@ -97,3 +97,6 @@ export default {
   },
 }
 </script>
+
+<style lang="less">
+</style>
