@@ -58,7 +58,7 @@ export default {
         code: generateModels(data),
       }
       const controllerMap = data.tables.map(table => ({
-        name: `ctrl_${table.tableName}`,
+        name: `${table.tableName}_ctr`,
         code: generateController(table),
       }))
       return [sql, model].concat(controllerMap)

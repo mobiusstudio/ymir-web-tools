@@ -23,7 +23,7 @@
       />
     </div>
     <div class="right-panel">
-      <!-- <CodeView /> -->
+      <CodeView />
     </div>
   </div>
 </template>
