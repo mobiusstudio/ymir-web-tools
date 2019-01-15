@@ -34,6 +34,7 @@
             @focus="setTempSchemaName"
             @blur="handleBlurSchema"
             @change="handleChangeSchema"
+            @pressEnter="handleConfirmSchema"
           >
             <a-icon
               v-show="tempSchemaName && tempSchemaName !== schema.schemaName"
@@ -49,6 +50,7 @@
             @focus="setTempTableName"
             @blur="handleBlurTable"
             @change="handleChangeTable"
+            @pressEnter="handleConfirmTable"
           >
             <a-icon
               v-show="tempTableName && tempTableName !== schema.tables[tid].tableName"
@@ -140,6 +142,12 @@ export default {
     },
     focusTable() {
       document.getElementById('input-table-name').focus()
+    },
+    blurSchema() {
+      document.getElementById('input-schema-name').blur()
+    },
+    blurTable() {
+      document.getElementById('input-table-name').blur()
     },
 
     // temp name
@@ -258,6 +266,16 @@ export default {
       }
     },
 
+    // confirm
+    handleConfirmSchema() {
+      this.blurSchema()
+      this.saveSchema()
+    },
+    handleConfirmTable() {
+      this.blurTable()
+      this.saveSchema()
+    },
+
     // add & remove
     handleAddSchema() {
       this.isNewSchema = true
@@ -305,7 +323,6 @@ export default {
     handleSelectTable(id) {
       this.isNewTable = false
       this.selectTable(id)
-      this.focusTable()
     },
 
     // change
