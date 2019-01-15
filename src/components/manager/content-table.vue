@@ -61,9 +61,9 @@ export default {
       this.$store.commit('change-table', payload)
     },
 
-    saveTable(data) {
+    saveTable() {
       this.$emit('save', {
-        data,
+        data: this.table,
       })
     },
 
@@ -84,7 +84,7 @@ export default {
     },
 
     saveColumn() {
-      this.saveTable(this.table)
+      this.saveTable()
     },
 
     changeColumn(data) {

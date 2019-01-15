@@ -2,20 +2,25 @@
   <div class="manager">
     <div class="left-panel">
       <Explorer
-        :schema-list="schemaList"
+        :list="schemaList"
         :schema="schema"
-        @select-schema="handleSelectSchema"
         @save="handleSaveSchema"
         @remove="handleRemoveSchema"
+        @select-schema="handleSelectSchema"
+        @change-schema="handleChangeSchema"
+        @select-table="handleSelectTable"
+        @change-table="handleChangeTable"
       />
     </div>
     <div class="content-panel">
       <!-- <ContentSwagger v-if="isSwagger" /> -->
-      <ContentTable
+      <!-- <ContentTable
         v-if="isTable"
         :table="table"
-        @save="handleSaveTable"
-      />
+        @change-table="handleChangeTable"
+        @select-column="handleSelectColumn"
+        @change-column="handleChangeColumn"
+      /> -->
     </div>
     <div class="right-panel">
       <!-- <CodeView /> -->
@@ -62,48 +67,107 @@ export default {
       this.isTable = false
     },
 
-    // schema
+    // commit
     commitSchema(payload) {
       this.$store.commit('change-schema', payload)
     },
-
-    saveSchema(isNew, data) {
-      console.log(isNew, this.$store.state.sid)
-      if (isNew) this.addSchema(data)
-      else this.updateSchema(data)
+    commitTable(payload) {
+      this.$store.commit('change-table', payload)
+    },
+    commitColumn(payload) {
+      this.$store.commit('change-column', payload)
     },
 
-    selectSchema(id) {
+    // select
+    selectSchema(id = 0) {
       this.commitSchema({
+        id,
+      })
+      this.selectTable()
+      this.selectColumn()
+    },
+    selectTable(id = 0) {
+      this.commitTable({
+        id,
+      })
+      this.selectColumn()
+    },
+    selectColumn(id = 0) {
+      this.commitColumn({
         id,
       })
     },
 
-    changeSchema(data) {
+    // change
+    changeSchema(schema) {
       this.commitSchema({
-        data,
+        schema,
+      })
+    },
+    changeTable(table) {
+      this.commitTable({
+        table,
+      })
+    },
+    changeColumn(column) {
+      this.commitColumn({
+        column,
       })
     },
 
-    handleSelectSchema(id) {
+    // save
+    saveSchema(isNew) {
+      const { schema } = this.$store.getters
+      if (isNew) this.addSchema(schema)
+      else {
+        const { sid } = this.$store.state
+        this.updateSchema(sid, schema)
+      }
+    },
+
+    // handle save & remove
+    handleSaveSchema(payload) {
+      const { data } = payload
+      this.saveSchema(data)
+    },
+
+    handleRemoveSchema(payload) {
+      const { id } = payload
+      this.deleteSchema(id)
+    },
+
+    // handle select & change
+    handleSelectSchema(payload) {
+      const { id, isNew } = payload
       if (id === null || id === undefined) {
         this.hideTable()
         this.listSchema()
       } else {
-        this.getSchema(id)
+        if (!isNew) this.getSchema(id)
         this.selectSchema(id)
-        this.selectTable(0)
         this.showTable()
       }
     },
-
-    handleSaveSchema(payload) {
-      const { isNew, data } = payload
-      this.saveSchema(isNew, data)
+    handleSelectTable(payload) {
+      const { id } = payload
+      this.selectTable(id)
+    },
+    handleSelectColumn(payload) {
+      const { id } = payload
+      this.selectColumn(id)
     },
 
-    handleRemoveSchema(index) {
-      this.deleteSchema(index)
+    handleChangeSchema(payload) {
+      const { data } = payload
+      this.changeSchema(data)
+    },
+    handleChangeTable(payload) {
+      const { data } = payload
+      this.changeTable(data)
+    },
+    handleChangeColumn(payload) {
+      const { data } = payload
+      this.changeColumn(data)
     },
 
     async listSchema() {
@@ -118,7 +182,8 @@ export default {
     async getSchema(id) {
       try {
         const res = await api.schema.get(id)
-        this.changeSchema(res.data)
+        const { data } = res
+        this.changeSchema(data)
       } catch (error) {
         this.$message.error(error.message)
       }
@@ -127,18 +192,15 @@ export default {
     async addSchema(data) {
       try {
         const res = await api.schema.add(data)
-        this.selectSchema({
-          id: res.id,
-        })
-        this.selectTable(0)
+        const { id } = res
+        this.selectSchema(id)
         this.$message.success(`Add new schema ${data.schemaName}`)
       } catch (error) {
         this.$message.error(error.message)
       }
     },
-    async updateSchema(data) {
+    async updateSchema(id, data) {
       try {
-        const id = this.$store.state.sid
         await api.schema.update(id, data)
         this.$message.success(`Update schema ${data.schemaName}`)
       } catch (error) {
@@ -155,21 +217,6 @@ export default {
         this.$message.error(error.message)
       }
     },
-
-    // table
-    commitTable(payload) {
-      this.$store.commit('change-table', payload)
-    },
-
-    selectTable(id) {
-      this.commitTable({
-        id,
-      })
-    },
-    handleSaveTable() {
-
-    },
-
   },
   mounted() {
     this.listSchema()

@@ -16,6 +16,11 @@ export default new Vuex.Store({
     }),
   },
   getters: {
+    schema: state => state.schema,
+
+    table: state => state.schema.tables[state.tid],
+
+    column: state => state.schema.tables[state.tid].columns[state.cid],
   },
   mutations: {
     'change-column': (state, payload) => {

@@ -1,8 +1,8 @@
 <template>
   <div class="schema-manager">
     <DynamicButtonList
-      v-if="isSchema"
-      :buttons="schemaList"
+      v-if="isList"
+      :buttons="list"
       title="schema"
       :btn-text="generateSchemaBtnText"
       btn-class="schema-btn"
@@ -10,7 +10,7 @@
       @remove="handleRemoveSchema"
       @add="handleAddSchema"
     />
-    <div v-else-if="isTable">
+    <div v-else-if="isSchema">
       <a-row
         type="flex"
         justify="space-between"
@@ -21,41 +21,39 @@
           </a-button>
         </a-col>
         <a-col>
-          <a-button class="schema-btn-special" @click="handleClickApply">
-            Apply
+          <a-button class="schema-btn-special" @click="handleClickSave">
+            Save
           </a-button>
         </a-col>
       </a-row>
       <a-form>
         <a-form-item label="schema name" required>
           <a-input
+            id="input-schema-name"
             v-model="schema.schemaName"
             @focus="setTempSchemaName"
-            @blur="resetSchemaName"
+            @blur="handleBlurSchema"
             @change="handleChangeSchema"
-            @pressEnter="handleSaveSchema"
           >
             <a-icon
               v-show="tempSchemaName && tempSchemaName !== schema.schemaName"
               slot="suffix"
               type="check"
-              @mousedown="handleSaveSchema"
             />
           </a-input>
         </a-form-item>
         <a-form-item label="table name" required>
           <a-input
+            id="input-table-name"
             v-model="schema.tables[tid].tableName"
             @focus="setTempTableName"
-            @blur="resetTableName"
+            @blur="handleBlurTable"
             @change="handleChangeTable"
-            @pressEnter="handleSaveTable"
           >
             <a-icon
               v-show="tempTableName && tempTableName !== schema.tables[tid].tableName"
               slot="suffix"
               type="check"
-              @mousedown="handleSaveTable"
             />
           </a-input>
         </a-form-item>
@@ -77,6 +75,7 @@
 <script>
 import { upperFirst } from 'lodash'
 import { Schema, Table } from '../../libs/schema'
+import validator from '../../validator'
 import DynamicButtonList from '../dynamic-button-list.vue'
 
 export default {
@@ -84,7 +83,7 @@ export default {
     DynamicButtonList,
   },
   props: {
-    schemaList: {
+    list: {
       type: Array,
       required: true,
     },
@@ -103,204 +102,218 @@ export default {
   },
   data() {
     return {
-      isSchema: true,
-      isTable: false,
+      isList: true,
+      isSchema: false,
       isNewSchema: false,
-      isNewTable: false,
       tempSchemaName: '',
       tempTableName: '',
     }
   },
   computed: {
+    sid() {
+      return this.$store.state.sid
+    },
     tid() {
       return this.$store.state.tid
     },
   },
   methods: {
-    generateSchemaBtnText(schemaList, index) {
-      if (!schemaList || schemaList.length === 0) return ''
-      return upperFirst(schemaList[index].schemaName)
+    generateSchemaBtnText(list, index) {
+      if (!list || list.length === 0) return ''
+      return upperFirst(list[index].schemaName)
     },
     generateTableBtnText(tableList, index) {
       if (!tableList || tableList.length === 0) return ''
-      return upperFirst(tableList[index].tableName || '...')
+      return upperFirst(tableList[index].tableName)
     },
 
-    handleClickBack() {
-      this.showSchemas()
-      this.selectSchema(null)
+    showList() {
+      this.isList = true
+      this.isSchema = false
+    },
+    showSchema() {
+      this.isList = false
+      this.isSchema = true
+    },
+    focusSchema() {
+      document.getElementById('input-schema-name').focus()
+    },
+    focusTable() {
+      document.getElementById('input-table-name').focus()
     },
 
-    handleClickApply() {
-    },
-
+    // temp name
     initTempName() {
       this.tempSchemaName = ''
       this.tempTableName = ''
     },
-
-    // schema
-    showSchemas() {
-      this.isSchema = true
-      this.isTable = false
-    },
-
     setTempSchemaName() {
       this.tempSchemaName = this.schema.schemaName
     },
+    setTempTableName() {
+      this.tempTableName = this.schema.tables[this.tid].tableName
+    },
     resetSchemaName() {
-      this.schema.schemaName = this.tempSchemaName
+      this.schema.setSchemaName(this.tempSchemaName)
+      this.changeSchema(this.chema)
+    },
+    resetTableName() {
+      this.schema.tables[this.tid].setTableName(this.tempTableName)
+      this.changeTable(this.schema.tables[this.tid])
     },
 
-    schemaCheck() {
-      if (!this.schema.schemaName) {
-        this.$message.error('Invalid empty schema name')
-        return false
-      }
-      return true
-    },
-
-    commitSchema(payload) {
-      this.$store.commit('change-schema', payload)
-    },
-
-    selectSchema(id) {
-      this.$emit('select-schema', id)
-    },
-    removeSchema(id) {
-      this.$emit('remove', id)
-    },
-    saveSchema(isNew = false) {
+    // save & remove
+    saveSchema() {
       this.$emit('save', {
-        isNew,
-        data: this.schema,
+        data: this.isNewSchema,
+      })
+    },
+
+    removeSchema(id) {
+      this.$emit('remove', {
+        id,
+      })
+    },
+    removeTable(id) {
+      this.schema.tables.splice(id, 1)
+      this.changeSchema(this.schema)
+    },
+    // select & change
+    selectSchema(id = 0) {
+      this.tempSchemaName = ''
+      this.$emit('select-schema', {
+        id,
+        isNew: this.isNewSchema,
+      })
+      this.selectTable()
+    },
+    selectTable(id = 0) {
+      this.tempTableName = ''
+      this.$emit('select-table', {
+        id,
       })
     },
     changeSchema(data) {
-      this.commitSchema({
+      this.$emit('change-schema', {
+        data,
+      })
+    },
+    changeTable(data) {
+      this.$emit('change-table', {
         data,
       })
     },
 
-    handleSelectSchema(id) {
-      this.isNewSchema = false
-      this.selectSchema(id)
-      this.initTempName()
-      this.showTables()
+    // check
+    checkSchema() {
+      const value = this.schema
+      const index = this.sid
+      const { list } = this
+      const key = 'schemaName'
+      const isNew = this.isNewSchema
+      return validator.duplicateKey({
+        value,
+        index,
+        list,
+        key,
+        isNew,
+        cb: () => { this.$message.error(`${isNew ? 'ADD' : 'UPDATE'}_ERROR: duplicate schema name - ${value}`) },
+      })
     },
 
+    checkTable() {
+      const value = this.schema.tables[this.tid].tableName
+      const index = this.tid
+      const list = this.schema.tables
+      const key = 'tableName'
+      const isNew = this.isNewTable
+      return validator.duplicateKey({
+        value,
+        index,
+        list,
+        key,
+        isNew,
+        cb: () => { this.$message.error(`${isNew ? 'ADD' : 'UPDATE'}_ERROR: duplicate table name - ${value}`) },
+      })
+    },
+
+    // handlers
+    handleClickBack() {
+      this.showList()
+      this.selectSchema(null)
+    },
+
+    handleClickSave() {
+      this.saveSchema()
+    },
+
+    // blur
+    handleBlurSchema() {
+      if (!this.checkSchema()) {
+        this.resetSchemaName()
+      }
+    },
+    handleBlurTable() {
+      if (!this.checkTable()) {
+        this.resetTableName()
+      }
+    },
+
+    // add & remove
     handleAddSchema() {
       this.isNewSchema = true
       const schema = new Schema({
         schemaName: '',
       })
+      const id = this.list.length
       this.changeSchema(schema)
-      this.selectTable(0)
-      this.showTables()
-    },
-
-    handleRemoveSchema(id) {
-      this.removeSchema(id)
-    },
-
-    handleSaveSchema() {
-      if (!this.schemaCheck) return
-      this.setTempSchemaName()
-      this.saveSchema(this.isNewSchema)
-    },
-
-    handleChangeSchema() {
-      this.schema.setSchemaName()
-      if (this.isNewSchema) this.schema.tables[0].setTableName(this.schema.schemaName)
-      this.changeSchema(this.schema)
-    },
-
-    // table
-    showTables() {
-      this.isSchema = false
-      this.isTable = true
-    },
-
-    setTempTableName() {
-      this.tempTableName = this.schema.tables[this.tid].tableName
-    },
-    resetTableName() {
-      this.schema.tables[this.tid].tableName = this.tempTableName
-    },
-
-    tableCheck(payload = null) {
-      if (!this.schema.tables[this.tid].tableName) {
-        this.$message.error('Invalid empty table name')
-        return false
-      }
-      if (payload) {
-        const { isNew, tableName } = payload
-        if (
-          (isNew && this.schema.tables.some(table => table.tableName === tableName))
-          || (!isNew && this.schema.tables.some((table, index) => table.tableName === tableName
-              && index !== this.tid))
-        ) {
-          this.$message.error(`Duplicate table name: ${tableName}`)
-          return false
-        }
-      }
-      return true
-    },
-
-    commitTable(payload) {
-      this.$store.commit('change-table', payload)
-    },
-
-    selectTable(id) {
-      this.commitTable({
-        id,
+      this.selectSchema(id)
+      this.showSchema()
+      this.$nextTick(() => {
+        this.focusSchema()
       })
     },
-    saveTable() {
-      this.saveSchema()
-    },
-    changeTable(data) {
-      this.commitTable({
-        data,
-      })
-    },
-
-    handleSelectTable(id) {
-      this.isNewTable = false
-      this.initTempName()
-      this.selectTable(id)
-    },
-
     handleAddTable() {
-      if (!this.tableCheck()) return
       this.isNewTable = true
       const table = new Table({
         schemaName: this.schema.schemaName,
         tableName: '',
       })
       const id = this.schema.tables.push(table) - 1
-      this.tempTableName = ''
       this.changeSchema(this.schema)
       this.selectTable(id)
+      this.focusTable()
     },
 
-    handleRemoveTable(index) {
-      this.schema.tables.splice(index, 1)
-      this.changeSchema(this.schema)
-      this.saveSchema()
-      const id = index === 0 ? 0 : index - 1
+    handleRemoveSchema(id) {
+      // validator
+      this.removeSchema(id)
+    },
+    handleRemoveTable(id) {
+      // validator
+      this.removeTable(id)
+      const newId = id === 0 ? 0 : id - 1
+      this.selectTable(newId)
+    },
+
+    // select
+    handleSelectSchema(id) {
+      this.isNewSchema = false
+      this.selectSchema(id)
+      this.showSchema()
+    },
+    handleSelectTable(id) {
+      this.isNewTable = false
       this.selectTable(id)
+      this.focusTable()
     },
 
-    handleSaveTable() {
-      if (!this.tableCheck({
-        isNew: this.isNewTable,
-        tableName: this.schema.tables[this.tid].tableName,
-      })) return
-      this.setTempTableName()
-      this.saveTable()
+    // change
+    handleChangeSchema() {
+      this.schema.setSchemaName()
+      if (this.isNewSchema) this.schema.tables[0].setTableName(this.schema.schemaName)
+      this.changeSchema(this.schema)
     },
-
     handleChangeTable() {
       this.schema.tables[this.tid].setTableName()
       this.changeTable(this.schema.tables[this.tid])
