@@ -114,6 +114,9 @@ export default {
         data: column,
       })
     },
+    clearChanges() {
+      this.$store.commit('clear-changes')
+    },
 
     // save
     saveSchema(isNew) {
@@ -123,6 +126,7 @@ export default {
         const { sid } = this.$store.state
         this.updateSchema(sid, schema)
       }
+      this.clearChanges()
     },
 
     // handle save & remove
@@ -142,6 +146,7 @@ export default {
       if (id === null || id === undefined) {
         this.hideTable()
         this.listSchema()
+        this.clearChanges()
       } else {
         if (!isNew) this.getSchema(id)
         this.selectSchema(id)

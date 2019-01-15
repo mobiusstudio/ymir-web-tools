@@ -118,6 +118,9 @@ export default {
     tid() {
       return this.$store.state.tid
     },
+    changes() {
+      return this.$store.state.changes
+    },
   },
   methods: {
     generateSchemaBtnText(list, index) {
@@ -172,6 +175,11 @@ export default {
       this.changeTable(this.schema.tables[this.tid])
     },
 
+    // count changes
+    countChanges() {
+      this.$store.commit('count-changes')
+    },
+
     // save & remove
     saveSchema() {
       this.$emit('save', {
@@ -190,7 +198,7 @@ export default {
     },
     // select & change
     selectSchema(id = 0) {
-      this.tempSchemaName = ''
+      this.initTempName()
       this.$emit('select-schema', {
         id,
         isNew: this.isNewSchema,
@@ -247,10 +255,30 @@ export default {
       })
     },
 
+    // quit
+    quit() {
+      this.selectSchema(null)
+      this.showList()
+    },
+
     // handlers
     handleClickBack() {
-      this.showList()
-      this.selectSchema(null)
+      if (this.changes > 0) {
+        this.$confirm({
+          content: `${this.changes} changes does't save`,
+          cancelText: 'Unsave',
+          onCancel: () => {
+            this.quit()
+          },
+          okText: 'Save & Quit',
+          onOk: () => {
+            this.saveSchema()
+            this.quit()
+          },
+        })
+      } else {
+        this.quit()
+      }
     },
 
     handleClickSave() {
@@ -273,6 +301,7 @@ export default {
     handleConfirmSchema() {
       if (this.checkSchema()) {
         this.saveSchema()
+        this.setTempSchemaName()
       } else {
         this.resetSchemaName()
       }
@@ -280,6 +309,7 @@ export default {
     handleConfirmTable() {
       if (this.checkTable()) {
         this.saveSchema()
+        this.setTempTableName()
       } else {
         this.resetTableName()
       }
@@ -293,6 +323,7 @@ export default {
       })
       const id = this.list.length
       this.changeSchema(schema)
+      this.countChanges()
       this.selectSchema(id)
       this.showSchema()
       this.$nextTick(() => {
@@ -307,6 +338,7 @@ export default {
       })
       const id = this.schema.tables.push(table) - 1
       this.changeSchema(this.schema)
+      this.countChanges()
       this.selectTable(id)
       this.focusTable()
     },
@@ -320,6 +352,7 @@ export default {
       this.removeTable(id)
       const newId = id === 0 ? 0 : id - 1
       this.selectTable(newId)
+      this.countChanges()
     },
 
     // select
@@ -338,10 +371,12 @@ export default {
       this.schema.setSchemaName()
       if (this.isNewSchema) this.schema.tables[0].setTableName(this.schema.schemaName)
       this.changeSchema(this.schema)
+      this.countChanges()
     },
     handleChangeTable() {
       this.schema.tables[this.tid].setTableName()
       this.changeTable(this.schema.tables[this.tid])
+      this.countChanges()
     },
   },
   mounted() {
