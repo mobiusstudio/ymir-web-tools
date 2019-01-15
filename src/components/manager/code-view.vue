@@ -6,8 +6,8 @@
     <a-tabs>
       <template v-for="view of viewMap">
         <a-tab-pane
-          :tab="view"
-          :key="view"
+          :tab="view.name"
+          :key="view.name"
         >
           <a-row
             type="flex"
@@ -20,14 +20,14 @@
                 type="dashed"
                 shape="circle"
                 icon="copy"
-                @click="handleClickCopy(view)"
-                :data-clipboard-target="`#${view}-code`"
+                @click="handleClickCopy(view.name)"
+                :data-clipboard-target="`#${view.name}-code`"
               />
             </a-col>
           </a-row>
           <a-textarea
-            :id="`${view}-code`"
-            :value="generateCode(view)"
+            :id="`${view.name}-code`"
+            :value="view.code"
             autosize
           />
         </a-tab-pane>
@@ -39,16 +39,30 @@
 <script>
 import Clipboard from 'clipboard'
 import generateSql from '../../templates/sql'
-import generateModel from '../../templates/model'
+import generateModels from '../../templates/model'
 import generateController from '../../templates/controller'
 
-const viewMap = ['sql', 'model', 'controller']
-
 export default {
-  data() {
-    return {
-      viewMap,
-    }
+  computed: {
+    schema() {
+      return this.$store.state.schema
+    },
+    viewMap() {
+      const data = this.schema
+      const sql = {
+        name: 'sql',
+        code: generateSql(data),
+      }
+      const model = {
+        name: 'model',
+        code: generateModels(data),
+      }
+      const controllerMap = data.tables.map(table => ({
+        name: `ctrl_${table.tableName}`,
+        code: generateController(table),
+      }))
+      return [sql, model].concat(controllerMap)
+    },
   },
   methods: {
     handleClickCopy(contentType) {
@@ -62,19 +76,6 @@ export default {
         e.clearSelection()
         this.clipboard.off('error')
       })
-    },
-    generateCode(view) {
-      const { data } = this.$store.state.schema
-      if (!data) return ''
-      switch (view) {
-        case 'sql':
-          return generateSql(data)
-        case 'model':
-          return generateModel(data)
-        case 'controller':
-          return generateController(data)
-        default: return ''
-      }
     },
   },
   mounted() {

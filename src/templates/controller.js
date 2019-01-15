@@ -81,8 +81,8 @@ ${content}
   return code
 }
 
-const generateController = (schema) => {
-  const { tableName } = schema
+const generateController = (table) => {
+  const { tableName } = table
   const code = // TODO: path should be smart
 `${generateFunc('add', tableName)}
 ${generateFunc('list', tableName)}

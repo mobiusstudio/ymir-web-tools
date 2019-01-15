@@ -1,10 +1,10 @@
+/* eslint-disable operator-linebreak */
 import { upperFirst } from 'lodash'
 
 const generateColumns = (columns) => {
   const columnArray = []
   columns.forEach((column) => {
-    const keyMap = ['name', 'type', 'alias', 'foreign', 'def', 'required']
-    // eslint-disable-next-line operator-linebreak
+    const keyMap = ['type', 'name', 'alias', 'foreign', 'def', 'required']
     const head = '      new Column({\n'
     const foot = '      }),'
     const codeArray = []
@@ -22,13 +22,12 @@ const generateColumns = (columns) => {
   return columnArray.join('\n')
 }
 
-const generateModel = (schema) => {
-  const { schemaName, tableName, columns } = schema
-  // eslint-disable-next-line operator-linebreak
-  const code = // TODO: path should be smart
-`import { DatabaseTable, Column, ColumnArray } from './core'
-
-export class ${upperFirst(tableName)} extends DatabaseTable {
+const generateTables = (tables) => {
+  const tableArray = []
+  tables.forEach((table) => {
+    const { schemaName, tableName, columns } = table
+    const code =
+`export class ${upperFirst(tableName)} extends DatabaseTable {
   constructor() {
     super('${schemaName}', '${tableName}')
     this.columns = new ColumnArray([
@@ -37,7 +36,19 @@ ${generateColumns(columns)}
   }
 }
 `
+    tableArray.push(code)
+  })
+  return tableArray.join('\n')
+}
+
+const generateModels = (schema) => {
+  const { tables } = schema
+  const code = // TODO: path should be smart
+`import { DatabaseTable, Column, ColumnArray } from './core'
+
+${generateTables(tables)}
+`
   return code
 }
 
-export default generateModel
+export default generateModels
