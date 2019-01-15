@@ -5,12 +5,12 @@
     </a-divider>
     <a-row type="flex" justify="center">
       <a-form v-if="buttons.length > 0">
-        <a-form-item>
+        <a-form-item :style="formStyle">
           <slot name="header" />
         </a-form-item>
         <a-button-group>
           <template v-for="(item, index) of buttons">
-            <a-form-item :key="index">
+            <a-form-item :key="index" :style="formStyle">
               <a-tooltip
                 placement="right"
                 :mouse-enter-delay="1"
@@ -31,7 +31,7 @@
             </a-form-item>
           </template>
         </a-button-group>
-        <a-form-item>
+        <a-form-item :style="formStyle">
           <slot name="footer" />
         </a-form-item>
       </a-form>
@@ -65,9 +65,18 @@ export default {
       type: String,
       default: '',
     },
+    margin: {
+      type: String || Number,
+      default: 24,
+    },
     selected: {
       type: Number,
       default: undefined,
+    },
+  },
+  computed: {
+    formStyle() {
+      return `margin-bottom: ${this.margin}px;`
     },
   },
   methods: {

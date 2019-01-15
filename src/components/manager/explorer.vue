@@ -1,11 +1,12 @@
 <template>
-  <div class="schema-manager">
+  <div class="explorer">
     <DynamicButtonList
       v-if="isList"
       :buttons="list"
       title="schema"
       :btn-text="generateSchemaBtnText"
       btn-class="schema-btn"
+      margin="16"
       @select="handleSelectSchema"
       @remove="handleRemoveSchema"
       @add="handleAddSchema"
@@ -27,12 +28,17 @@
         </a-col>
       </a-row>
       <a-form>
-        <a-form-item label="schema name" required>
+        <a-form-item
+          label="schema name"
+          required
+          style="margin-bottom:12px;"
+        >
+          <!-- TODO: create smart input component -->
           <a-input
             id="input-schema-name"
             v-model="schema.schemaName"
             @focus="setTempSchemaName"
-            @blur="handleBlurSchema"
+            @blur="handleBlurSchemaName"
             @change="handleChangeSchema"
             @pressEnter="handleConfirmSchema"
           >
@@ -43,12 +49,16 @@
             />
           </a-input>
         </a-form-item>
-        <a-form-item label="table name" required>
+        <a-form-item
+          label="table name"
+          required
+          style="margin-bottom:12px;"
+        >
           <a-input
             id="input-table-name"
             v-model="schema.tables[tid].tableName"
             @focus="setTempTableName"
-            @blur="handleBlurTable"
+            @blur="handleBlurTableName"
             @change="handleChangeTable"
             @pressEnter="handleConfirmTable"
           >
@@ -65,6 +75,7 @@
         title="table"
         :btn-text="generateTableBtnText"
         btn-class="table-btn"
+        margin="16"
         :selected="tid"
         @select="handleSelectTable"
         @remove="handleRemoveTable"
@@ -76,9 +87,9 @@
 
 <script>
 import { upperFirst } from 'lodash'
-import { Schema, Table } from '../../libs/schema'
-import validator from '../../validator'
 import DynamicButtonList from '../dynamic-button-list.vue'
+import validator from '../../validator'
+import { Schema, Table } from '../../libs/schema'
 
 export default {
   components: {
@@ -167,12 +178,14 @@ export default {
     resetSchemaName() {
       if (this.tempSchemaName === '') this.schema.schemaName = ''
       else this.schema.setSchemaName(this.tempSchemaName)
-      this.changeSchema(this.schema)
+      const data = this.schema
+      this.changeSchema(data)
     },
     resetTableName() {
       if (this.tempTableName === '') this.schema.tables[this.tid].tableName = ''
       else this.schema.tables[this.tid].setTableName(this.tempTableName)
-      this.changeTable(this.schema.tables[this.tid])
+      const data = this.schema.tables[this.tid]
+      this.changeTable(data)
     },
 
     // count changes
@@ -182,8 +195,9 @@ export default {
 
     // save & remove
     saveSchema() {
+      const data = this.isNewSchema
       this.$emit('save', {
-        data: this.isNewSchema,
+        data,
       })
     },
 
@@ -194,14 +208,16 @@ export default {
     },
     removeTable(id) {
       this.schema.tables.splice(id, 1)
-      this.changeSchema(this.schema)
+      const data = this.schema
+      this.changeSchema(data)
     },
     // select & change
     selectSchema(id = 0) {
       this.initTempName()
+      const isNew = this.isNewSchema
       this.$emit('select-schema', {
         id,
-        isNew: this.isNewSchema,
+        isNew,
       })
     },
     selectTable(id = 0) {
@@ -286,12 +302,12 @@ export default {
     },
 
     // blur
-    handleBlurSchema() {
+    handleBlurSchemaName() {
       if (!this.checkSchema()) {
         this.resetSchemaName()
       }
     },
-    handleBlurTable() {
+    handleBlurTableName() {
       if (!this.checkTable()) {
         this.resetTableName()
       }
@@ -318,8 +334,9 @@ export default {
     // add & remove
     handleAddSchema() {
       this.isNewSchema = true
+      const schemaName = ''
       const schema = new Schema({
-        schemaName: '',
+        schemaName,
       })
       const id = this.list.length
       this.changeSchema(schema)
@@ -332,9 +349,11 @@ export default {
     },
     handleAddTable() {
       this.isNewTable = true
+      const { schemaName } = this.schema
+      const tableName = ''
       const table = new Table({
-        schemaName: this.schema.schemaName,
-        tableName: '',
+        schemaName,
+        tableName,
       })
       const id = this.schema.tables.push(table) - 1
       this.changeSchema(this.schema)
@@ -370,12 +389,14 @@ export default {
     handleChangeSchema() {
       this.schema.setSchemaName()
       if (this.isNewSchema) this.schema.tables[0].setTableName(this.schema.schemaName)
-      this.changeSchema(this.schema)
+      const data = this.schema
+      this.changeSchema(data)
       this.countChanges()
     },
     handleChangeTable() {
       this.schema.tables[this.tid].setTableName()
-      this.changeTable(this.schema.tables[this.tid])
+      const data = this.schema.tables[this.tid]
+      this.changeTable(data)
       this.countChanges()
     },
   },
@@ -385,14 +406,11 @@ export default {
 </script>
 
 <style lang="less">
-.schema-manager {
+.explorer {
   position: absolute;
   left: 0;
   width: 100%;
   padding: 20px;
-  .ant-form-item {
-    margin-bottom: 8px;
-  }
   .schema-btn-special {
     margin: 10px 0 20px 0;
     color: whitesmoke;

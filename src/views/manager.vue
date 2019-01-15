@@ -14,13 +14,13 @@
     </div>
     <div class="content-panel">
       <!-- <ContentSwagger v-if="isSwagger" /> -->
-      <!-- <ContentTable
+      <ContentTable
         v-if="isTable"
         :table="table"
         @change-table="handleChangeTable"
         @select-column="handleSelectColumn"
         @change-column="handleChangeColumn"
-      /> -->
+      />
     </div>
     <div class="right-panel">
       <!-- <CodeView /> -->
@@ -99,19 +99,19 @@ export default {
     },
 
     // change
-    changeSchema(schema) {
+    changeSchema(data) {
       this.commitSchema({
-        data: schema,
+        data,
       })
     },
-    changeTable(table) {
+    changeTable(data) {
       this.commitTable({
-        data: table,
+        data,
       })
     },
-    changeColumn(column) {
+    changeColumn(data) {
       this.commitColumn({
-        data: column,
+        data,
       })
     },
     clearChanges() {

@@ -19,8 +19,6 @@ export class Column {
     this.def = def
     this.required = required
   }
-
-  static keyMap = ['type', 'name', 'alias', 'foreign']
 }
 
 export class Table {
