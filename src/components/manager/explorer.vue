@@ -185,7 +185,6 @@ export default {
         id,
         isNew: this.isNewSchema,
       })
-      this.selectTable()
     },
     selectTable(id = 0) {
       this.tempTableName = ''
@@ -270,6 +269,7 @@ export default {
       this.selectSchema(id)
       this.showSchema()
       this.$nextTick(() => {
+        console.log(this.sid, this.tid, this.schema)
         this.focusSchema()
       })
     },

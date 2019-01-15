@@ -101,17 +101,17 @@ export default {
     // change
     changeSchema(schema) {
       this.commitSchema({
-        schema,
+        data: schema,
       })
     },
     changeTable(table) {
       this.commitTable({
-        table,
+        data: table,
       })
     },
     changeColumn(column) {
       this.commitColumn({
-        column,
+        data: column,
       })
     },
 
