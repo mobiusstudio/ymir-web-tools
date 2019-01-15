@@ -1,5 +1,5 @@
 /* eslint-disable operator-linebreak */
-import { snakeCase } from 'lodash'
+import { snakeCase, without } from 'lodash'
 
 const snakeCaseSchema = (schema) => {
   const { schemaName, tables } = schema
@@ -100,7 +100,8 @@ const generateTables = (tables) => {
   const tableArray = []
   tables.forEach((table) => {
     const { schemaName, tableName, pkeyIndex, columns } = table
-    const pkey = columns.splice(pkeyIndex, 1)
+    const pkey = columns[pkeyIndex]
+    const newColumns = without(columns, pkey)
     const code =
 `--------------------------------
 -- ${tableName} notes:
@@ -109,7 +110,7 @@ const generateTables = (tables) => {
 CREATE TABLE "${schemaName}".${tableName}
 (
   ${generatePkey(pkey)}
-  ${generateColumns(columns)}
+  ${generateColumns(newColumns)}
   create_time bigint DEFAULT unix_now(),
   last_update_time bigint DEFAULT unix_now(),
   PRIMARY KEY (${pkey.name})
