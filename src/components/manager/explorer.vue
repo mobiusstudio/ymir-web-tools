@@ -162,11 +162,13 @@ export default {
       this.tempTableName = this.schema.tables[this.tid].tableName
     },
     resetSchemaName() {
-      this.schema.setSchemaName(this.tempSchemaName)
-      this.changeSchema(this.chema)
+      if (this.tempSchemaName === '') this.schema.schemaName = ''
+      else this.schema.setSchemaName(this.tempSchemaName)
+      this.changeSchema(this.schema)
     },
     resetTableName() {
-      this.schema.tables[this.tid].setTableName(this.tempTableName)
+      if (this.tempTableName === '') this.schema.tables[this.tid].tableName = ''
+      else this.schema.tables[this.tid].setTableName(this.tempTableName)
       this.changeTable(this.schema.tables[this.tid])
     },
 
@@ -213,11 +215,12 @@ export default {
 
     // check
     checkSchema() {
-      const value = this.schema
+      const value = this.schema.schemaName
       const index = this.sid
       const { list } = this
       const key = 'schemaName'
       const isNew = this.isNewSchema
+      console.log(value, index, list, isNew)
       return validator.duplicateKey({
         value,
         index,
@@ -237,7 +240,7 @@ export default {
       return validator.duplicateKey({
         value,
         index,
-        list,
+        list: isNew ? list.slice(0, -1) : list,
         key,
         isNew,
         cb: () => { this.$message.error(`${isNew ? 'ADD' : 'UPDATE'}_ERROR: duplicate table name - ${value}`) },
@@ -268,12 +271,18 @@ export default {
 
     // confirm
     handleConfirmSchema() {
-      this.blurSchema()
-      this.saveSchema()
+      if (this.checkSchema()) {
+        this.saveSchema()
+      } else {
+        this.resetSchemaName()
+      }
     },
     handleConfirmTable() {
-      this.blurTable()
-      this.saveSchema()
+      if (this.checkTable()) {
+        this.saveSchema()
+      } else {
+        this.resetTableName()
+      }
     },
 
     // add & remove
@@ -287,7 +296,6 @@ export default {
       this.selectSchema(id)
       this.showSchema()
       this.$nextTick(() => {
-        console.log(this.sid, this.tid, this.schema)
         this.focusSchema()
       })
     },

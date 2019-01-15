@@ -15,9 +15,10 @@ validator.duplicateKey = ({
     || typeof key !== 'string'
   ) throw new Error('invalid parameters')
   if (
-    (isNew && list.some(item => item === value))
-    || (!isNew && list.some((item, i) => item === value && i !== index))
+    (isNew && list.some(item => item[key] === value))
+    || (!isNew && list.some((item, i) => item[key] === value && i !== index))
   ) {
+    console.log(value, list, index)
     cb()
     return false
   }
