@@ -62,22 +62,26 @@
             v-if="column.type === 'boolean'"
             v-model="column.def"
             @change="handleChangeColumn"
+            :disabled="isPkey"
           />
           <a-input-number
             v-else-if="column.type === 'number'"
             v-model="column.def"
             @change="handleChangeColumn"
+            :disabled="isPkey"
             style="width:100%;"
           />
           <a-date-picker
             v-else-if="column.type === 'timestamp'"
             v-model="column.def"
             @change="handleChangeColumn"
+            :disabled="isPkey"
           />
           <a-input
             v-else
             v-model="column.def"
             @change="handleChangeColumn"
+            :disabled="isPkey"
           />
         </a-form-item>
         <a-form-item
@@ -88,6 +92,7 @@
           <a-switch
             v-model="column.required"
             @change="handleChangeColumn"
+            :disabled="isPkey"
           />
         </a-form-item>
       </a-form>
@@ -104,6 +109,10 @@ export default {
     title: {
       type: String,
       required: true,
+    },
+    isPkey: {
+      type: Boolean,
+      default: false,
     },
     column: {
       type: Object,

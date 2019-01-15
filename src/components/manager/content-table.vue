@@ -28,6 +28,7 @@
         <TableDetail
           :title="columnDetailTitle"
           :column="column"
+          :is-pkey="isPkey"
           @focus-name="setTempColumnName"
           @blur-name="handleBlurColumnName"
           @change="handleChangeColumn"
@@ -61,6 +62,9 @@ export default {
     }
   },
   computed: {
+    isPkey() {
+      return this.table.pkeyIndex === this.cid
+    },
     cid() {
       return this.$store.state.cid
     },
