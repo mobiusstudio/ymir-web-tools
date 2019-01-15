@@ -1,4 +1,4 @@
-import { Schema, Table, Column } from '../libs/schema'
+import { Schema, Table, Column } from '@/libs/schema'
 
 export const fakeSchemaArray = [
   new Schema({

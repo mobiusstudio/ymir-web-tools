@@ -2,13 +2,15 @@ import { Schema } from '../libs/schema'
 
 const api = {}
 
+const address = process.env.NODE_ENV === 'test' ? 'test-db-schema' : 'database-schema'
+
 const getSchemaList = () => {
-  const schemaList = JSON.parse(localStorage.getItem('database-schema')) || []
+  const schemaList = JSON.parse(localStorage.getItem(address)) || []
   return schemaList
 }
 const setSchemaList = (schemaList) => {
   const buffer = JSON.stringify(schemaList)
-  localStorage.setItem('database-schema', buffer)
+  localStorage.setItem(address, buffer)
 }
 
 api.schema = {
