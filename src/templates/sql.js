@@ -1,18 +1,18 @@
 /* eslint-disable operator-linebreak */
-import { snakeCase, without } from 'lodash'
+import { cloneDeep, snakeCase, without } from 'lodash'
 
 const snakeCaseSchema = (schema) => {
-  const { schemaName, tables } = schema
-  const newSchema = schema
+  const newSchema = cloneDeep(schema)
+  const { schemaName, tables } = newSchema
   newSchema.schemaName = snakeCase(schemaName)
   newSchema.tables = tables.map((table) => {
-    const { tableName, columns } = table
     const newTable = table
+    const { tableName, columns } = newTable
     newTable.schemaName = snakeCase(schemaName)
     newTable.tableName = snakeCase(tableName)
     newTable.columns = columns.map((column) => {
-      const { name } = column
       const newColumn = column
+      const { name } = newColumn
       newColumn.schemaName = snakeCase(schemaName)
       newColumn.tableName = snakeCase(tableName)
       newColumn.name = snakeCase(name)
@@ -20,6 +20,7 @@ const snakeCaseSchema = (schema) => {
     })
     return newTable
   })
+  console.log(schema)
   return newSchema
 }
 
@@ -60,7 +61,7 @@ const generateType = (type) => {
 }
 
 const generateDefault = (def) => {
-  if (def === null || def === undefined) return ''
+  if (def === null || def === undefined || def === '') return ''
   const value = typeof def === 'string' ? `'${def}'` : def
   return `DEFAULT ${value}`
 }
@@ -71,10 +72,11 @@ const generatePkey = (pkey) => {
   switch (type) {
     case 'id-auto':
     default:
-      def = `${schemaName}".${schemaName}_id()`
+      def = `"${schemaName}".${schemaName}_id()`
       break
   }
-  const code = `${name} ${generateType(type)} DEFAULT ${def} NOT NULL REFERENCES ${foreign},`
+  const references = foreign ? ` REFERENCES ${foreign}` : ''
+  const code = `${name} ${generateType(type)} DEFAULT ${def} NOT NULL${references},`
   return code
 }
 
@@ -83,14 +85,15 @@ const generateColumns = (columns) => {
   const strArray = []
   columns.forEach((column) => {
     const { name, type, def, required } = column
-    const end = required ? ' NOT NULL,' : ','
-    const arr = [
-      name,
-      generateType(type),
-      generateDefault(def),
-      end,
-    ]
-    const string = arr.join(' ')
+    const typeString = generateType(type)
+    const defString = generateDefault(def)
+    const end = required ? 'NOT NULL' : null
+    const arr = [name]
+    if (typeString) arr.push(typeString)
+    if (defString) arr.push(defString)
+    if (end) arr.push(end)
+    const string = arr.join(' ').concat(',')
+    console.log(arr, string)
     strArray.push(string)
   })
   return strArray.join('\n  ')
@@ -126,6 +129,7 @@ WITH (
 
 const generateSql = (schema) => {
   const newSchema = snakeCaseSchema(schema)
+  // const newSchema = schema
   const { schemaName, tables } = newSchema
   const code =
 `--------------------------------
