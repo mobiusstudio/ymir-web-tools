@@ -5,9 +5,7 @@
     </a-divider>
     <a-row type="flex" justify="center">
       <a-form v-if="buttons.length > 0">
-        <a-form-item :style="formStyle">
-          <slot name="header" />
-        </a-form-item>
+        <a-form-item :style="formStyle" />
         <a-button-group>
           <template v-for="(item, index) of buttons">
             <a-form-item :key="index" :style="formStyle">
@@ -31,9 +29,7 @@
             </a-form-item>
           </template>
         </a-button-group>
-        <a-form-item :style="formStyle">
-          <slot name="footer" />
-        </a-form-item>
+        <a-form-item :style="formStyle" />
       </a-form>
     </a-row>
     <a-divider>
