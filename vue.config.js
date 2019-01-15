@@ -1,5 +1,6 @@
 module.exports = {
   productionSourceMap: false,
+
   css: {
     loaderOptions: {
       less: {
@@ -7,4 +8,6 @@ module.exports = {
       },
     },
   },
+
+  lintOnSave: undefined,
 }
