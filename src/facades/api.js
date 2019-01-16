@@ -13,6 +13,27 @@ const setSchemaList = (schemaList) => {
   localStorage.setItem(address, buffer)
 }
 
+api.download = () => {
+  const data = localStorage.getItem(address)
+  console.log(data)
+  const filename = 'ymir.config.json'
+  const type = 'json'
+  const file = new Blob([data], { type })
+  if (window.navigator.msSaveOrOpenBlob) { // IE10+
+    window.navigator.msSaveOrOpenBlob(file, filename)
+  }
+  const a = document.createElement('a')
+  const url = URL.createObjectURL(file)
+  document.body.appendChild(a)
+  a.href = url
+  a.download = filename
+  a.click()
+  setTimeout(() => {
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  }, 0)
+}
+
 api.schema = {
   list: async () => {
     const schemaList = getSchemaList()

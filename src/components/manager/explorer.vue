@@ -201,7 +201,7 @@ export default {
     },
 
     // download
-    downloadSchema() {
+    download() {
       this.$emit('download')
     },
 
@@ -313,12 +313,12 @@ export default {
       this.askSchema({
         cancelText: 'Directely download',
         onCancel: () => {
-          this.downloadSchema()
+          this.download()
         },
         okText: 'Save before download',
         onOk: () => {
           this.saveSchema(() => {
-            this.downloadSchema()
+            this.download()
           })
         },
       })

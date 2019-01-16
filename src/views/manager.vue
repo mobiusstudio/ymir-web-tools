@@ -4,6 +4,7 @@
       <Explorer
         :list="schemaList"
         :schema="schema"
+        @download="handleDownload"
         @save="handleSaveSchema"
         @remove="handleRemoveSchema"
         @select-schema="handleSelectSchema"
@@ -135,13 +136,14 @@ export default {
       }
     },
 
+    // handle download
+    handleDownload() {
+      this.download()
+    },
+
     // handle save & remove
     handleSaveSchema(payload) {
       const { data, cb } = payload
-      // const cb = () => {
-      //   console.log('hahaha')
-      // }
-      console.log(cb)
       this.saveSchema(data, cb)
     },
 
@@ -183,6 +185,14 @@ export default {
     handleChangeColumn(payload) {
       const { data } = payload
       this.changeColumn(data)
+    },
+
+    async download() {
+      try {
+        await api.download()
+      } catch (error) {
+        this.$message.error(error.message)
+      }
     },
 
     async listSchema() {
