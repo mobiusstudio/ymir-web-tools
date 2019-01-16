@@ -20,7 +20,6 @@ const snakeCaseSchema = (schema) => {
     })
     return newTable
   })
-  console.log(schema)
   return newSchema
 }
 
@@ -93,7 +92,6 @@ const generateColumns = (columns) => {
     if (defString) arr.push(defString)
     if (end) arr.push(end)
     const string = arr.join(' ').concat(',')
-    console.log(arr, string)
     strArray.push(string)
   })
   return strArray.join('\n  ')

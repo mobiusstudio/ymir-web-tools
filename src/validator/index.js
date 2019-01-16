@@ -18,7 +18,6 @@ validator.duplicateKey = ({
     (isNew && list.some(item => item[key] === value))
     || (!isNew && list.some((item, i) => item[key] === value && i !== index))
   ) {
-    console.log(value, list, index)
     cb()
     return false
   }
