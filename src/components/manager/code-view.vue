@@ -15,16 +15,23 @@
             align="middle"
           >
             <a-col>
-              <a-button
+              <a-icon
                 class="copy-button"
+                type="copy"
+                @click="handleClickCopy(view.name)"
+                :data-clipboard-target="`#${view.name}-code`"
+              />
+              <!-- <a-button
+                "class="copy-button
                 type="dashed"
                 shape="circle"
                 icon="copy"
                 @click="handleClickCopy(view.name)"
                 :data-clipboard-target="`#${view.name}-code`"
-              />
+              /> -->
             </a-col>
           </a-row>
+          <!-- <code :id="`${view.name}-code`">{{view.code}}</code> -->
           <a-textarea
             :id="`${view.name}-code`"
             :value="view.code"
@@ -90,5 +97,16 @@ export default {
   right: 0;
   width: 100%;
   padding: 10px 20px;
+  .copy-button {
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    margin-top: 10px;
+    z-index: 1;
+    font-size: 16px;
+    :hover {
+      font-size: 20px;
+    }
+  }
 }
 </style>
