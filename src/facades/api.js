@@ -15,7 +15,6 @@ const setSchemaList = (schemaList) => {
 
 api.download = () => {
   const data = localStorage.getItem(address)
-  console.log(data)
   const filename = 'ymir.config.json'
   const type = 'json'
   const file = new Blob([data], { type })
