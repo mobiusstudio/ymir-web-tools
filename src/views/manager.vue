@@ -119,20 +119,30 @@ export default {
     },
 
     // save
-    saveSchema(isNew) {
+    async saveSchema(isNew = false, cb = () => {}) {
       const { schema } = this.$store.getters
-      if (isNew) this.addSchema(schema)
-      else {
-        const { sid } = this.$store.state
-        this.updateSchema(sid, schema)
+      try {
+        if (isNew) {
+          await this.addSchema(schema)
+        } else {
+          const { sid } = this.$store.state
+          await this.updateSchema(sid, schema)
+        }
+        this.clearChanges()
+        cb()
+      } catch (error) {
+        this.$message.error(error.message)
       }
-      this.clearChanges()
     },
 
     // handle save & remove
     handleSaveSchema(payload) {
-      const { data } = payload
-      this.saveSchema(data)
+      const { data, cb } = payload
+      // const cb = () => {
+      //   console.log('hahaha')
+      // }
+      console.log(cb)
+      this.saveSchema(data, cb)
     },
 
     handleRemoveSchema(payload) {

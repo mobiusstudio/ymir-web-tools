@@ -26,6 +26,13 @@
             Save
           </a-button>
         </a-col>
+        <a-col>
+          <a-button
+            class="schema-btn-special"
+            icon="download"
+            @click="handleClickDownload"
+          />
+        </a-col>
       </a-row>
       <a-form>
         <a-form-item
@@ -193,11 +200,17 @@ export default {
       this.$store.commit('count-changes')
     },
 
+    // download
+    downloadSchema() {
+      this.$emit('download')
+    },
+
     // save & remove
-    saveSchema() {
+    saveSchema(cb = () => {}) {
       const data = this.isNewSchema
       this.$emit('save', {
         data,
+        cb,
       })
     },
 
@@ -244,7 +257,6 @@ export default {
       const { list } = this
       const key = 'schemaName'
       const isNew = this.isNewSchema
-      console.log(value, index, list, isNew)
       return validator.duplicateKey({
         value,
         index,
@@ -271,6 +283,25 @@ export default {
       })
     },
 
+    askSchema({
+      cancelText = '',
+      onCancel = () => {},
+      okText = '',
+      onOk = () => {},
+    }) {
+      if (this.changes > 0) {
+        this.$confirm({
+          content: `${this.changes} changes does't save`,
+          cancelText,
+          onCancel,
+          okText,
+          onOk,
+        })
+      } else {
+        onCancel()
+      }
+    },
+
     // quit
     quit() {
       this.selectSchema(null)
@@ -278,23 +309,34 @@ export default {
     },
 
     // handlers
+    handleClickDownload() {
+      this.askSchema({
+        cancelText: 'Directely download',
+        onCancel: () => {
+          this.downloadSchema()
+        },
+        okText: 'Save before download',
+        onOk: () => {
+          this.saveSchema(() => {
+            this.downloadSchema()
+          })
+        },
+      })
+    },
+
     handleClickBack() {
-      if (this.changes > 0) {
-        this.$confirm({
-          content: `${this.changes} changes does't save`,
-          cancelText: 'Unsave',
-          onCancel: () => {
+      this.askSchema({
+        cancelText: 'Directely quit',
+        onCancel: () => {
+          this.quit()
+        },
+        okText: 'Save before quit',
+        onOk: () => {
+          this.saveSchema(() => {
             this.quit()
-          },
-          okText: 'Save & Quit',
-          onOk: () => {
-            this.saveSchema()
-            this.quit()
-          },
-        })
-      } else {
-        this.quit()
-      }
+          })
+        },
+      })
     },
 
     handleClickSave() {
@@ -316,16 +358,18 @@ export default {
     // confirm
     handleConfirmSchema() {
       if (this.checkSchema()) {
-        this.saveSchema()
-        this.setTempSchemaName()
+        this.saveSchema(() => {
+          this.setTempSchemaName()
+        })
       } else {
         this.resetSchemaName()
       }
     },
     handleConfirmTable() {
       if (this.checkTable()) {
-        this.saveSchema()
-        this.setTempTableName()
+        this.saveSchema(() => {
+          this.setTempTableName()
+        })
       } else {
         this.resetTableName()
       }
