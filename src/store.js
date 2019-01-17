@@ -8,6 +8,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    schemaList: [],
     changes: 0,
     sid: 0,
     tid: 0,
@@ -41,6 +42,9 @@ export default new Vuex.Store({
     'change-schema': (state, payload) => {
       if (payload.id || payload.id === 0) state.sid = payload.id
       if (payload.data) state.schema = payload.data
+    },
+    'change-list': (state, payload) => {
+      if (payload.data) state.schemaList = payload.data
     },
     'count-changes': (state) => {
       state.changes += 1

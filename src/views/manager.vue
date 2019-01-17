@@ -47,10 +47,12 @@ export default {
     return {
       isSwagger: false,
       isTable: false,
-      schemaList: [],
     }
   },
   computed: {
+    schemaList() {
+      return this.$store.state.schemaList
+    },
     schema() {
       return this.$store.state.schema
     },
@@ -69,6 +71,9 @@ export default {
     },
 
     // commit
+    commitList(payload) {
+      this.$store.commit('change-list', payload)
+    },
     commitSchema(payload) {
       this.$store.commit('change-schema', payload)
     },
@@ -100,6 +105,11 @@ export default {
     },
 
     // change
+    changeList(data) {
+      this.commitList({
+        data,
+      })
+    },
     changeSchema(data) {
       this.commitSchema({
         data,
@@ -198,7 +208,8 @@ export default {
     async listSchema() {
       try {
         const res = await api.schema.list()
-        this.schemaList = res.data
+        const { data } = res
+        this.changeList(data)
       } catch (error) {
         this.$message.error(error.message)
       }
@@ -218,8 +229,9 @@ export default {
       try {
         const res = await api.schema.add(data)
         const { id } = res
-        this.selectSchema(id)
         this.$message.success(`Add new schema ${data.schemaName}`)
+        this.listSchema()
+        this.selectSchema(id)
       } catch (error) {
         this.$message.error(error.message)
       }
@@ -228,6 +240,7 @@ export default {
       try {
         await api.schema.update(id, data)
         this.$message.success(`Update schema ${data.schemaName}`)
+        this.listSchema()
       } catch (error) {
         this.$message.error(error.message)
       }

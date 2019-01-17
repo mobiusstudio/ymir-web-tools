@@ -16,7 +16,7 @@
             :tree-data="types"
             :tree-default-expand-all="false"
             show-search
-            v-model="column.type"
+            :value="column.type"
             @change="handleChangeColumn"
           />
         </a-form-item>
@@ -49,9 +49,11 @@
           :wrapper-col="wrapperCol"
           label="foreign"
         >
-          <a-input
-            v-model="column.foreign"
-            @change="handleChangeColumn"
+          <a-cascader
+            :options="tables"
+            :show-search="true"
+            :value="foreignArray"
+            @change="handleChangForeign"
           />
         </a-form-item>
         <a-form-item
@@ -128,17 +130,38 @@ export default {
     return {
       labelCol,
       wrapperCol,
-      testType: '',
     }
   },
   computed: {
+    foreignArray() {
+      if (this.column.foreign) return this.column.foreign.split('.')
+      return []
+    },
+    tables() {
+      const { schemaList } = this.$store.state
+      const list = schemaList.map((schema) => {
+        const { schemaName, tables } = schema
+        const key = `"${schemaName}"`
+        const newSchema = {
+          value: key,
+          label: key,
+          children: tables.map(table => ({
+            value: table.tableName,
+            label: table.tableName,
+          })),
+        }
+        return newSchema
+      })
+      return list
+    },
     types() {
       return typeNameData
     },
   },
   methods: {
-    handleTestType() {
-      console.log(this.testType)
+    handleChangForeign(foreignArray) {
+      this.column.foreign = foreignArray.join('.')
+      this.handleChangeColumn()
     },
 
     handleFocusColumnName() {
