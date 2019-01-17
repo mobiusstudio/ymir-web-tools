@@ -16,7 +16,7 @@
             :tree-data="types"
             :tree-default-expand-all="false"
             show-search
-            :value="column.type"
+            v-model="column.type"
             @change="handleChangeColumn"
           />
         </a-form-item>
@@ -63,27 +63,27 @@
           label="default"
         >
           <!-- TODO: create dynamic input -->
+          <a-date-picker
+            v-if="column.type === 'timestamp'"
+            v-model="column.def"
+            @change="handleChangeColumn"
+            :disabled="isPkey"
+          />
           <a-switch
-            v-if="column.type === 'boolean'"
+            v-else-if="column.type === 'boolean'"
             v-model="column.def"
             @change="handleChangeColumn"
             :disabled="isPkey"
           />
           <a-input-number
-            v-else-if="column.type === 'number'"
+            v-else-if="find(column.type) === 'number'"
             v-model="column.def"
             @change="handleChangeColumn"
             :disabled="isPkey"
             style="width:100%;"
           />
-          <a-date-picker
-            v-else-if="column.type === 'timestamp'"
-            v-model="column.def"
-            @change="handleChangeColumn"
-            :disabled="isPkey"
-          />
           <a-input
-            v-else
+            v-else-if="find(column.type) === 'string'"
             v-model="column.def"
             @change="handleChangeColumn"
             :disabled="isPkey"
@@ -106,7 +106,7 @@
 </template>
 
 <script>
-import { typeNameData } from '../../libs/types'
+import { types, find } from '../../libs/types'
 
 const labelCol = { span: 5 }
 const wrapperCol = { span: 18, offset: 1 }
@@ -155,13 +155,31 @@ export default {
       return list
     },
     types() {
+      const typeNameData = []
+      Object.keys(types).forEach((p) => {
+        const type = {
+          value: p,
+          label: p,
+          children: [],
+        }
+        Object.keys(types[p]).forEach((s) => {
+          if (s !== 'default') {
+            const child = {
+              value: s,
+              label: s,
+            }
+            type.children.push(child)
+          }
+        })
+        typeNameData.push(type)
+      })
       return typeNameData
     },
   },
   methods: {
-    handleChangForeign(foreignArray) {
-      this.column.foreign = foreignArray.join('.')
-      this.handleChangeColumn()
+    find(s) {
+      console.log(s)
+      return find(s)
     },
 
     handleFocusColumnName() {
@@ -183,6 +201,11 @@ export default {
       this.$emit('change', {
         data,
       })
+    },
+
+    handleChangForeign(foreignArray) {
+      this.column.foreign = foreignArray.join('.')
+      this.handleChangeColumn()
     },
   },
   mounted() {
