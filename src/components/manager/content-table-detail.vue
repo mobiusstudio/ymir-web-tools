@@ -12,7 +12,10 @@
           label="type"
           required
         >
-          <a-input
+          <a-tree-select
+            :tree-data="types"
+            :tree-default-expand-all="false"
+            show-search
             v-model="column.type"
             @change="handleChangeColumn"
           />
@@ -101,6 +104,8 @@
 </template>
 
 <script>
+import { typeNameData } from '../../libs/types'
+
 const labelCol = { span: 5 }
 const wrapperCol = { span: 18, offset: 1 }
 
@@ -123,9 +128,19 @@ export default {
     return {
       labelCol,
       wrapperCol,
+      testType: '',
     }
   },
+  computed: {
+    types() {
+      return typeNameData
+    },
+  },
   methods: {
+    handleTestType() {
+      console.log(this.testType)
+    },
+
     handleFocusColumnName() {
       const data = this.column.name
       this.$emit('focus-name', {
