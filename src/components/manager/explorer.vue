@@ -1,22 +1,30 @@
 <template>
   <div class="explorer">
-    <a-row
-      v-if="isList"
-      type="flex"
-      justify="center"
-    >
-      <a-upload
-        accept="application/json"
-        :show-upload-list="false"
-        :before-upload="handleClickUpload"
+    <div v-if="isList">
+      <a-row
+        type="flex"
+        justify="center"
       >
-        <a-button
-          class="schema-btn-load"
-          icon="upload"
+        <a-upload
+          accept="application/json"
+          :show-upload-list="false"
+          :before-upload="handleClickUpload"
         >
-          Load
+          <a-button
+            class="schema-btn-load"
+            icon="upload"
+          >
+            Load
+          </a-button>
+        </a-upload>
+        <a-button
+          class="schema-btn-download"
+          icon="download"
+          @click="handleClickDownload"
+        >
+          Download
         </a-button>
-      </a-upload>
+      </a-row>
       <DynamicButtonList
         :buttons="list"
         title="schema"
@@ -27,7 +35,7 @@
         @remove="handleRemoveSchema"
         @add="handleAddSchema"
       />
-    </a-row>
+    </div>
     <div v-else-if="isSchema">
       <a-row
         type="flex"
@@ -502,9 +510,10 @@ export default {
       color: whitesmoke;
       background-color: #888;
     }
-    &-load {
+    &-load,
+    &-download {
       min-width: 120px;
-      margin: 20px 0;
+      margin: 15px 0;
       color: whitesmoke;
       background-color: #666;
     }

@@ -20,7 +20,7 @@ const saveSchemaList = (schemaList) => {
 }
 
 api.download = () => {
-  const data = localStorage.getItem(address)
+  const data = sessionStorage.getItem(address)
   const filename = 'ymir.config.json'
   const type = 'json'
   const file = new Blob([data], { type })

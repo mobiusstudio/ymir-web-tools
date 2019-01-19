@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
-export class Column {
+import { ColumnBase, TableBase, SchemaBase } from '../../../ymir-codegen/src/libs/schema/base'
+
+export class Column extends ColumnBase {
   constructor({
     schemaName = '',
     tableName = '',
@@ -7,56 +9,53 @@ export class Column {
     name,
     alias = null,
     foreign = null,
-    def = null,
+    default: def = null,
     required = false,
   }) {
-    this.schemaName = schemaName
-    this.tableName = tableName
-    this.type = type
-    this.name = name
-    this.alias = alias
-    this.foreign = foreign
-    this.def = def
-    this.required = required
+    super({
+      schemaName,
+      tableName,
+      type,
+      name,
+      alias,
+      foreign,
+      default: def,
+      required,
+    })
   }
 }
 
-export class Table {
+export class Table extends TableBase {
   constructor({
     schemaName,
     tableName,
     pkeyIndex = 0,
-    columns = [
-      new Column({
-        tableName,
-        type: 'number',
-        name: 'id',
-      }),
-    ],
+    columns = [],
   }) {
-    this.schemaName = schemaName
-    this.tableName = tableName
-    this.pkeyIndex = pkeyIndex
+    super({
+      schemaName,
+      tableName,
+      pkeyIndex,
+    })
     this.columns = columns.map((column) => {
       const {
         type,
         name,
         alias = '',
         foreign = '',
-        def = undefined,
+        default: def = undefined,
         required = false,
       } = column
-      const newColumn = new Column({
+      return new Column({
         schemaName,
         tableName,
         type,
         name,
         alias,
         foreign,
-        def,
+        default: def,
         required,
       })
-      return newColumn
     })
   }
 
@@ -77,30 +76,26 @@ export class Table {
   }
 }
 
-export class Schema {
+export class Schema extends SchemaBase {
   constructor({
     schemaName,
-    tables = [
-      new Table({
-        schemaName,
-        tableName: '',
-      }),
-    ],
+    tables = [],
   }) {
-    this.schemaName = schemaName
+    super({
+      schemaName,
+    })
     this.tables = tables.map((table) => {
       const {
         tableName,
         pkeyIndex,
         columns,
       } = table
-      const newTable = new Table({
+      return new Table({
         schemaName,
         tableName,
         pkeyIndex,
         columns,
       })
-      return newTable
     })
   }
 

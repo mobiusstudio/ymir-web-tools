@@ -106,7 +106,6 @@
 </template>
 
 <script>
-import { camelCase } from 'lodash'
 import { types, find } from '../../libs/types'
 
 const labelCol = { span: 5 }
