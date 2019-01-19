@@ -65,26 +65,26 @@
           <!-- TODO: create dynamic input -->
           <a-date-picker
             v-if="column.type === 'timestamp'"
-            v-model="column.def"
+            v-model="column.default"
             @change="handleChangeColumn"
             :disabled="isPkey"
           />
           <a-switch
             v-else-if="column.type === 'boolean'"
-            v-model="column.def"
+            v-model="column.default"
             @change="handleChangeColumn"
             :disabled="isPkey"
           />
           <a-input-number
             v-else-if="find(column.type) === 'number'"
-            v-model="column.def"
+            v-model="column.default"
             @change="handleChangeColumn"
             :disabled="isPkey"
             style="width:100%;"
           />
           <a-input
             v-else-if="find(column.type) === 'string'"
-            v-model="column.def"
+            v-model="column.default"
             @change="handleChangeColumn"
             :disabled="isPkey"
           />
@@ -106,6 +106,7 @@
 </template>
 
 <script>
+import { camelCase } from 'lodash'
 import { types, find } from '../../libs/types'
 
 const labelCol = { span: 5 }
@@ -134,17 +135,17 @@ export default {
   },
   computed: {
     foreignArray() {
-      if (this.column.foreign) return this.column.foreign.split('.')
-      return []
+      console.log(this.column.foreign)
+      if (typeof this.column.foreign === 'string') return [this.column.schemaName, this.column.foreign]
+      return this.column.foreign || []
     },
     tables() {
       const { schemaList } = this.$store.state
       const list = schemaList.map((schema) => {
         const { schemaName, tables } = schema
-        const key = `"${schemaName}"`
         const newSchema = {
-          value: key,
-          label: key,
+          value: schemaName,
+          label: `"${schemaName}"`,
           children: tables.map(table => ({
             value: table.tableName,
             label: table.tableName,
@@ -178,7 +179,6 @@ export default {
   },
   methods: {
     find(s) {
-      console.log(s)
       return find(s)
     },
 
@@ -204,7 +204,7 @@ export default {
     },
 
     handleChangForeign(foreignArray) {
-      this.column.foreign = foreignArray.join('.')
+      this.column.foreign = foreignArray
       this.handleChangeColumn()
     },
   },
