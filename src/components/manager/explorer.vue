@@ -1,16 +1,33 @@
 <template>
   <div class="explorer">
-    <DynamicButtonList
+    <a-row
       v-if="isList"
-      :buttons="list"
-      title="schema"
-      :btn-text="generateSchemaBtnText"
-      btn-class="schema-btn"
-      margin="16"
-      @select="handleSelectSchema"
-      @remove="handleRemoveSchema"
-      @add="handleAddSchema"
-    />
+      type="flex"
+      justify="center"
+    >
+      <a-upload
+        accept="application/json"
+        :show-upload-list="false"
+        :before-upload="handleClickUpload"
+      >
+        <a-button
+          class="schema-btn-load"
+          icon="upload"
+        >
+          Load
+        </a-button>
+      </a-upload>
+      <DynamicButtonList
+        :buttons="list"
+        title="schema"
+        :btn-text="generateSchemaBtnText"
+        btn-class="schema-btn"
+        margin="16"
+        @select="handleSelectSchema"
+        @remove="handleRemoveSchema"
+        @add="handleAddSchema"
+      />
+    </a-row>
     <div v-else-if="isSchema">
       <a-row
         type="flex"
@@ -200,7 +217,12 @@ export default {
       this.$store.commit('count-changes')
     },
 
-    // download
+    // load & download
+    loadFile(data) {
+      this.$emit('load', {
+        data,
+      })
+    },
     download() {
       this.$emit('download')
     },
@@ -309,6 +331,16 @@ export default {
     },
 
     // handlers
+    handleClickUpload(file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const data = JSON.parse(e.target.result)
+        this.loadFile(data)
+      }
+      reader.readAsText(file)
+      return false
+    },
+
     handleClickDownload() {
       this.askSchema({
         cancelText: 'Directely download',
@@ -469,6 +501,12 @@ export default {
       min-width: 120px;
       color: whitesmoke;
       background-color: #888;
+    }
+    &-load {
+      min-width: 120px;
+      margin: 20px 0;
+      color: whitesmoke;
+      background-color: #666;
     }
   }
 }

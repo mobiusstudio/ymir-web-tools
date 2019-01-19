@@ -1,15 +1,21 @@
 import { Schema } from '../libs/schema'
+import { formatSchemaList } from '../utils'
 
 const api = {}
 
 const address = process.env.NODE_ENV === 'test' ? 'test-db-schema' : 'database-schema'
 
 const getSchemaList = () => {
-  const schemaList = JSON.parse(localStorage.getItem(address)) || []
+  const schemaList = JSON.parse(sessionStorage.getItem(address)) || JSON.parse(localStorage.getItem(address)) || []
   return schemaList
 }
 const setSchemaList = (schemaList) => {
   const buffer = JSON.stringify(schemaList)
+  sessionStorage.setItem(address, buffer)
+}
+const saveSchemaList = (schemaList) => {
+  const buffer = JSON.stringify(schemaList)
+  setSchemaList(schemaList)
   localStorage.setItem(address, buffer)
 }
 
@@ -33,26 +39,19 @@ api.download = () => {
   }, 0)
 }
 
+
 api.schema = {
   list: async () => {
     const schemaList = getSchemaList()
-    const list = schemaList.map((schema) => {
-      const { schemaName, tables } = schema
-      const newSchema = {
-        schemaName,
-        tables: [],
-      }
-      newSchema.tables = tables.map((table) => {
-        const { tableName } = table
-        const newTable = {
-          tableName,
-        }
-        return newTable
-      })
-      return newSchema
-    })
     return {
-      data: list,
+      data: formatSchemaList(schemaList),
+    }
+  },
+  load: async (data) => {
+    const schemaList = data
+    setSchemaList(schemaList)
+    return {
+      data: formatSchemaList(schemaList),
     }
   },
   get: async (id) => {
@@ -74,7 +73,7 @@ api.schema = {
       const { schemaName, tables } = data
       const schema = new Schema({ schemaName, tables })
       const length = schemaList.push(schema)
-      setSchemaList(schemaList)
+      saveSchemaList(schemaList)
       return {
         id: length - 1,
       }
@@ -89,14 +88,14 @@ api.schema = {
       const { schemaName, tables } = data
       const schema = new Schema({ schemaName, tables })
       schemaList[id] = schema
-      setSchemaList(schemaList)
+      saveSchemaList(schemaList)
     }
   },
   delete: async (id) => {
     const schemaList = getSchemaList()
     if (id < 0 || id > schemaList.length - 1) throw new Error(`API_ERROR: Invalid Schema Id: ${id}`)
     schemaList.splice(id, 1)
-    setSchemaList(schemaList)
+    saveSchemaList(schemaList)
   },
 }
 

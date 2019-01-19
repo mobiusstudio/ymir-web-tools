@@ -4,6 +4,7 @@
       <Explorer
         :list="schemaList"
         :schema="schema"
+        @load="handleLoadFile"
         @download="handleDownload"
         @save="handleSaveSchema"
         @remove="handleRemoveSchema"
@@ -146,6 +147,13 @@ export default {
       }
     },
 
+    // handle load file
+
+    handleLoadFile(payload) {
+      const { data } = payload
+      this.loadFile(data)
+    },
+
     // handle download
     handleDownload() {
       this.download()
@@ -195,6 +203,15 @@ export default {
     handleChangeColumn(payload) {
       const { data } = payload
       this.changeColumn(data)
+    },
+
+    async loadFile(data) {
+      try {
+        const res = await api.schema.load(data)
+        this.changeList(res.data)
+      } catch (error) {
+        this.$message.error(error.message)
+      }
     },
 
     async download() {
