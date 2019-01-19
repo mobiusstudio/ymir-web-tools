@@ -45,9 +45,7 @@
 
 <script>
 import Clipboard from 'clipboard'
-import generateSql from '../../templates/sql'
-import generateModels from '../../templates/model'
-import generateController from '../../templates/controller'
+import { sqlCode, modelCode, controllerCode } from '../../code'
 
 export default {
   computed: {
@@ -58,15 +56,15 @@ export default {
       const data = this.schema
       const sql = {
         name: 'sql',
-        code: generateSql(data),
+        code: sqlCode(data),
       }
       const model = {
         name: 'model',
-        code: generateModels(data),
+        code: modelCode(data),
       }
       const controllerMap = data.tables.map(table => ({
         name: `${table.tableName}_ctr`,
-        code: generateController(table),
+        code: controllerCode(table),
       }))
       return [sql, model].concat(controllerMap)
     },

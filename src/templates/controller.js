@@ -81,7 +81,7 @@ ${content}
   return code
 }
 
-const generateController = (table) => {
+export const schemaCode = (table) => {
   const { tableName } = table
   const code = // TODO: path should be smart
 `${generateFunc('add', tableName)}
@@ -92,5 +92,3 @@ ${generateFunc('delete', tableName)}
 `
   return code
 }
-
-export default generateController
