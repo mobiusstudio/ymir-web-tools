@@ -25,7 +25,7 @@
       />
     </div>
     <div class="right-panel">
-      <CodeView />
+      <CodeView v-if="isTable" />
     </div>
   </div>
 </template>
