@@ -154,7 +154,7 @@ export default {
               children: table.columns.map(column => ({
                 value: column.name,
                 label: column.name,
-              }))
+              })),
             })),
           })
         }

@@ -242,6 +242,7 @@ export default {
         data,
         cb,
       })
+      this.isNewSchema = false
     },
 
     removeSchema(id) {
@@ -380,7 +381,8 @@ export default {
     },
 
     handleClickSave() {
-      this.saveSchema()
+      this.saveSchema(() => {
+      })
     },
 
     // blur
@@ -460,7 +462,6 @@ export default {
 
     // select
     handleSelectSchema(id) {
-      this.isNewSchema = false
       this.selectSchema(id)
       this.showSchema()
     },

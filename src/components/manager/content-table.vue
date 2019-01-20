@@ -160,13 +160,9 @@ export default {
     handleAddColumn() {
       this.isNewColumn = true
       const { schemaName, tableName } = this.table
-      const type = ''
-      const name = ''
       const column = new Column({
         schemaName,
         tableName,
-        type,
-        name,
       })
       const id = this.table.columns.push(column) - 1
       const data = this.table

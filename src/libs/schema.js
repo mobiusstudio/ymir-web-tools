@@ -5,8 +5,8 @@ export class Column extends ColumnBase {
   constructor({
     schemaName = '',
     tableName = '',
-    type,
-    name,
+    type = null,
+    name = null,
     alias = null,
     foreign = null,
     default: def = null,
@@ -27,10 +27,15 @@ export class Column extends ColumnBase {
 
 export class Table extends TableBase {
   constructor({
-    schemaName,
-    tableName,
+    schemaName = '',
+    tableName = '',
     pkeyIndex = 0,
-    columns = [],
+    columns = [new Column({
+      schemaName,
+      tableName,
+      type: 'id-auto',
+      name: 'id',
+    })],
   }) {
     super({
       schemaName,
@@ -78,8 +83,10 @@ export class Table extends TableBase {
 
 export class Schema extends SchemaBase {
   constructor({
-    schemaName,
-    tables = [],
+    schemaName = '',
+    tables = [new Table({
+      schemaName,
+    })],
   }) {
     super({
       schemaName,
