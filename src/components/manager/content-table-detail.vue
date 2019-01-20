@@ -50,7 +50,8 @@
           label="foreign"
         >
           <a-cascader
-            :options="tables"
+            :options="foreignTables"
+            :change-on-select="true"
             :show-search="true"
             :value="foreignArray"
             @change="handleChangForeign"
@@ -138,19 +139,25 @@ export default {
       if (typeof this.column.foreign === 'string') return [this.column.schemaName, this.column.foreign]
       return this.column.foreign || []
     },
-    tables() {
-      const { schemaList } = this.$store.state
-      const list = schemaList.map((schema) => {
-        const { schemaName, tables } = schema
-        const newSchema = {
-          value: schemaName,
-          label: `"${schemaName}"`,
-          children: tables.map(table => ({
-            value: table.tableName,
-            label: table.tableName,
-          })),
+    foreignTables() {
+      const { schemaList, sid } = this.$store.state
+      const list = []
+      schemaList.forEach((schema, id) => {
+        if (sid >= id) {
+          const { schemaName, tables } = schema
+          list.push({
+            value: schemaName,
+            label: `"${schemaName}"`,
+            children: tables.map(table => ({
+              value: table.tableName,
+              label: table.tableName,
+              children: table.columns.map(column => ({
+                value: column.name,
+                label: column.name,
+              }))
+            })),
+          })
         }
-        return newSchema
       })
       return list
     },
@@ -203,7 +210,8 @@ export default {
     },
 
     handleChangForeign(foreignArray) {
-      this.column.foreign = foreignArray
+      if (foreignArray.length === 0) this.column.foreign = null
+      else this.column.foreign = foreignArray
       this.handleChangeColumn()
     },
   },
