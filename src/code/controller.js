@@ -81,7 +81,7 @@ ${content}
   return code
 }
 
-export const schemaCode = (table) => {
+export const controllerCode = (table) => {
   const { tableName } = table
   const code = // TODO: path should be smart
 `${generateFunc('add', tableName)}

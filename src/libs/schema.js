@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { ColumnBase, TableBase, SchemaBase } from '../../../ymir-codegen/src/libs/schema/base'
+import { ColumnBase, TableBase, SchemaBase } from '../../../ymir-codegen/src/libs/schema'
 
 export class Column extends ColumnBase {
   constructor({
