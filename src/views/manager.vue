@@ -14,8 +14,7 @@
         @change-table="handleChangeTable"
       />
     </div>
-    <div class="content-panel">
-      <!-- <ContentSwagger v-if="isSwagger" /> -->
+    <div class="right-panel">
       <ContentTable
         v-if="isTable"
         :table="table"
@@ -24,24 +23,21 @@
         @change-column="handleChangeColumn"
       />
     </div>
-    <div class="right-panel">
-      <CodeView v-if="isTable" />
-    </div>
   </div>
 </template>
 
 <script>
 import Explorer from '../components/manager/explorer.vue'
-import CodeView from '../components/manager/code-view.vue'
-import ContentSwagger from '../components/manager/content-swagger.vue'
+// import CodeView from '../components/manager/code-view.vue'
+// import ContentSwagger from '../components/manager/content-swagger.vue'
 import ContentTable from '../components/manager/content-table.vue'
 import api from '../facades/api'
 
 export default {
   components: {
     Explorer,
-    CodeView,
-    ContentSwagger,
+    // CodeView,
+    // ContentSwagger,
     ContentTable,
   },
   data() {
@@ -291,22 +287,15 @@ export default {
   .left-panel {
     position: absolute;
     left: 0;
-    width: 15%;
+    width: 20%;
     min-height: 100%;
     border-right: 2px #333 solid;
     overflow-y: scroll;
   }
-  .content-panel {
-    position: absolute;
-    left: 15%;
-    right: 35%;
-    min-height: 100%;
-    padding: 20px;
-  }
   .right-panel {
     position: absolute;
     right: 0;
-    width: 35%;
+    width: 80%;
     min-height: 100%;
     border-left: 2px #333 solid;
     overflow-y: scroll;

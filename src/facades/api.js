@@ -21,7 +21,7 @@ const saveSchemaList = (schemaList) => {
 
 api.download = () => {
   const data = sessionStorage.getItem(address)
-  const filename = 'ymir.config.json'
+  const filename = 'api.config.json'
   const type = 'json'
   const file = new Blob([data], { type })
   if (window.navigator.msSaveOrOpenBlob) { // IE10+

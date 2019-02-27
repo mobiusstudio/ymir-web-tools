@@ -11,7 +11,7 @@
         @change="handleChangeTable"
       />
     </a-row>
-    <a-row type="flex" justify="space-between">
+    <a-row type="flex" justify="center">
       <a-col :span="12" class="column-list">
         <DynamicButtonList
           :buttons="table.columns"

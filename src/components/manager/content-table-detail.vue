@@ -107,7 +107,7 @@
 </template>
 
 <script>
-import { types, find } from '../../libs/types'
+import { types, find } from 'chaos-library'
 
 const labelCol = { span: 5 }
 const wrapperCol = { span: 18, offset: 1 }

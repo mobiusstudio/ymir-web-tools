@@ -17,6 +17,11 @@
             Load
           </a-button>
         </a-upload>
+      </a-row>
+      <a-row
+        type="flex"
+        justify="center"
+      >
         <a-button
           class="schema-btn-download"
           icon="download"
